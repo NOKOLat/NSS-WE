@@ -6,7 +6,7 @@ import useScrollTrigger from '@mui/material/useScrollTrigger';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import ResponsiveDrawer from '../Components/ResponsiveDrawer';
-import Stopwatch from '../kansuu/Timer';
+import Stopwatch from '../Components/Timer';
 import '../App.css';
 import { useNavigate } from "react-router-dom";
 import CommonToolbar from '../Components/CommonToolbar';

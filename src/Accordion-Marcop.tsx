@@ -13,8 +13,8 @@ import MuiAccordionSummary, {
   accordionSummaryClasses,
 } from '@mui/material/AccordionSummary';
 import MuiAccordionDetails from '@mui/material/AccordionDetails';
-import Counter from './kansuu/Counter';
-import Stopwatch from './kansuu/Timer'
+import Counter from './Components/Counter';
+import Stopwatch from './Components/Timer'
 import TextField from '@mui/material/TextField';
 
 const Accordion = styled((props: AccordionProps) => (

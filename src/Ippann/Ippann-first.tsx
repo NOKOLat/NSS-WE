@@ -5,7 +5,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import useScrollTrigger from '@mui/material/useScrollTrigger';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
-import Stopwatch from '../kansuu/Timer';
+import Stopwatch from '../Components/Timer';
 import '../App.css';
 
 interface Props {
