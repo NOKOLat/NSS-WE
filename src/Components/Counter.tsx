@@ -19,7 +19,7 @@ export default function Counter() {
       }}>-1</button>
       <button onClick={() => {
         increment();
-      }}>+2</button>
+      }}>+1</button>
     </>
   );
 }
