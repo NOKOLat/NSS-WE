@@ -11,7 +11,7 @@ import '../App.css';
 import { useNavigate } from "react-router-dom";
 import CommonToolbar from '../Components/CommonToolbar';
 
-import Customized_Accordions from '../Accordion-Marcop';
+import Customized_Accordions from '../Accordion-Marti_copter';
 
 interface Props {
   window?: () => Window;
