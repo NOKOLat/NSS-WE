@@ -15,8 +15,8 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import AirplanemodeActiveIcon from '@mui/icons-material/AirplanemodeActive';
 import WindPowerIcon from '@mui/icons-material/WindPower';
-import App from '../Ippann/Ippann-first';
-import Accordion from '../Ippann/Accordion-ippann';
+import ElevateAppBar from '../plane/plane-first';
+import CustomizedAccordions from '../plane/Accordion-plane';
 import { useNavigate } from "react-router-dom";
 
 const drawerWidth = 240;
@@ -141,8 +141,8 @@ export default function ResponsiveDrawer(props: Props) {
        
         <React.StrictMode>
 
-            <App />
-            <Accordion/>
+            <ElevateAppBar />
+            <CustomizedAccordions/>
             
           </React.StrictMode>
         
