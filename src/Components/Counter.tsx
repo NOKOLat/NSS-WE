@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import {Button, Box, Stack} from '@mui/material'
 
 export default function Counter() {
   const [score, setscore] = useState(0);
@@ -12,14 +13,10 @@ export default function Counter() {
   }
 
   return (
-    <>
-      {score}
-      <button onClick={() => {
-        decrement();
-      }}>-1</button>
-      <button onClick={() => {
-        increment();
-      }}>+1</button>
-    </>
+    <Stack direction={'row'} spacing={1.5} sx={{justifyContent: 'center',alignItems:'center',p:0.5}}>
+      <Box sx={{hight:'100%',display:'flex',justifyContent: 'center',alignItems:'center',p:0}}>{score}</Box>
+      <Button onClick={() => {decrement();}} variant='outlined'>-1</Button>
+      <Button onClick={() => {increment();}} variant='outlined'>+1</Button>
+    </Stack>
   );
 }

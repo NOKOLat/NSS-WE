@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import  { useRef } from 'react';
+import {Button, Stack, Box} from '@mui/material'
 
 function Stopwatch() {
     const [time, setTime] = useState(0);
@@ -30,16 +31,20 @@ function Stopwatch() {
   
 
     return (
-        <div>
-            計測時間
-            <p>{minutes}:{seconds}:{milliseconds}</p>
+        <Box sx={{p:1}}>
+        <Stack>
+            <Box>計測時間</Box>
+            <Box>{minutes}:{seconds}:{milliseconds}</Box>
+            <Stack direction={'row'} spacing={1} sx={{justifyContent: 'center',alignItems:'center'}}>
             {isRunning ? (
-                <button onClick={handlePause}>Stop</button>
+                <Button onClick={handlePause} variant='outlined'>Stop</Button>
             ) : (
-                <button onClick={handleStart}>Start</button>
+                <Button onClick={handleStart} variant='outlined'>Start</Button>
             )}
-            <button onClick={handleReset}>Reset</button>
-        </div>
+            <Button onClick={handleReset} variant='outlined'>Reset</Button>
+            </Stack>
+        </Stack> 
+        </Box>
     );
 }
 
