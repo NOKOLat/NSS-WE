@@ -1,7 +1,6 @@
 import * as React from 'react';
 import Toolbar from '@mui/material/Toolbar';
 import CssBaseline from '@mui/material/CssBaseline';
-import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import ResponsiveDrawer from '../Components/ResponsiveDrawer';
 import Stopwatch from '../Components/Timer';
@@ -9,6 +8,7 @@ import '../App.css';
 import { useNavigate } from "react-router-dom";
 import CommonToolbar from '../Components/CommonToolbar';
 import Accordions_Multicopter from '../Accordions/Accordion-multicopter';
+import Typography from '@mui/material/Typography';
 
 interface Props {
   window?: () => Window;
@@ -33,16 +33,16 @@ export default function Multicopter(props: Props) {
       <Container>
        
         <ResponsiveDrawer>
-          <div>
-          <Box >
-        <h3>マルコプ部門</h3>
-        </Box>
-          <Box>
-          チーム名
-          </Box>
-          <Box>得点</Box>
+        
+        <Typography variant="h5" component="h3" gutterBottom>
+          マルコプ部門
+        </Typography>
+            <Typography variant="body1">チーム名</Typography>
+          
+            <Typography variant="body1">得点</Typography>
+         
             <Stopwatch />
-          </div>
+          
 
 <React.StrictMode>
 

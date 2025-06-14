@@ -1,4 +1,3 @@
-// filepath: c:\my_program\study\NSS-WE\src\Components\ResponsiveDrawer.tsx
 import * as React from 'react';
 import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
