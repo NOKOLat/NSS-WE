@@ -8,14 +8,14 @@ import Stopwatch from '../Components/Timer';
 import '../App.css';
 import { useNavigate } from "react-router-dom";
 import CommonToolbar from '../Components/CommonToolbar';
-import Accordions_Multicopter from '../Accordions/Accordion-multicopter';
+import Accordions_Plane from '../Accordions/Accordion-plane';
 
 interface Props {
   window?: () => Window;
   children?: React.ReactElement<{ elevation?: number }>;
 }
 
-export default function Multicopter(props: Props) {
+export default function Plane(props: Props) {
   const navigate = useNavigate();
   const drawerWidth = 240; 
   const handleDrawerToggle = () => { 
@@ -35,7 +35,7 @@ export default function Multicopter(props: Props) {
         <ResponsiveDrawer>
           <div>
           <Box >
-        <h3>マルコプ部門</h3>
+        <h3>一般部門</h3>
         </Box>
           <Box>
           チーム名
@@ -47,7 +47,7 @@ export default function Multicopter(props: Props) {
 <React.StrictMode>
 
         
-            <Accordions_Multicopter/>
+            <Accordions_Plane/>
             
           </React.StrictMode>
 

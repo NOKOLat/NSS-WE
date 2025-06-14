@@ -27,6 +27,9 @@ const Accordion = styled((props: AccordionProps) => (
   '&::before': {
     display: 'none',
   },
+
+  width: '500px', 
+  margin: '0 auto', // 中央揃え
 }));
 
 
@@ -59,7 +62,7 @@ const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
 
 
 
-export default function CustomizedAccordions() {
+export default function Accordions_Plane() {
   const [expanded, setExpanded] = React.useState<string | false>('panel1');
 
   const handleChange =

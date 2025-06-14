@@ -1,4 +1,4 @@
-import './App.css';
+import '../App.css';
 import * as React from 'react';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
@@ -13,8 +13,8 @@ import MuiAccordionSummary, {
   accordionSummaryClasses,
 } from '@mui/material/AccordionSummary';
 import MuiAccordionDetails from '@mui/material/AccordionDetails';
-import Counter from './Components/Counter';
-import Stopwatch from './Components/Timer'
+import Counter from '../Components/Counter';
+import Stopwatch from '../Components/Timer'
 import TextField from '@mui/material/TextField';
 
 const Accordion = styled((props: AccordionProps) => (
@@ -27,6 +27,10 @@ const Accordion = styled((props: AccordionProps) => (
   '&::before': {
     display: 'none',
   },
+
+
+  width: '500px', 
+  margin: '0 auto', // 中央揃え
 }));
 
 
@@ -59,7 +63,7 @@ const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
 
 
 
-export default function Customized_Accordions() {
+export default function Accordions_Multicopter() {
   const [expanded, setExpanded] = React.useState<string | false>('panel1');
 
   const handleChange =
