@@ -18,6 +18,7 @@ const CommonToolbar: React.FC<Props> = ({ drawerWidth, handleDrawerToggle }) => 
       sx={{
         width: { sm: `calc(100% - ${drawerWidth}px)` },
         ml: { sm: `${drawerWidth}px` },
+         backgroundColor: '#0a647b',
       }}
     >
       <Toolbar>

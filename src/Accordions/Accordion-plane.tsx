@@ -178,8 +178,40 @@ export default function Accordions_Plane() {
          <FormControlLabel  control={<Checkbox />} label="着陸成功" />
           </FormGroup>
         </AccordionDetails>
+      
+      </Accordion>
+
+
+      <Accordion expanded={expanded === 'panel15'} onChange={handleChange('panel15')}>
+        <AccordionSummary aria-controls="panel15d-content" id="panel15d-header">
+          <Typography component="span">上昇旋回（ハンズオフ飛行専用）</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+        <FormGroup>
+         <FormControlLabel  control={<Checkbox />} label="成功" />
+          </FormGroup>
+        </AccordionDetails>
         
       </Accordion>
+
+      <Accordion expanded={expanded === 'panel16'} onChange={handleChange('panel16')}>
+        <AccordionSummary aria-controls="panel16d-content" id="panel16d-header">
+          <Typography component="span">自動物資投下（ハンズオフ飛行専用）</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+        <FormGroup>
+         <FormControlLabel  control={<Checkbox />} label="自動離陸成功" />
+         <FormControlLabel  control={<Checkbox />} label="自動物資投下成功" />
+         <FormControlLabel  control={<Checkbox />} label="着陸成功" />
+          </FormGroup>
+        </AccordionDetails>
+        
+      </Accordion>
+
+
+
+
+
       <Accordion expanded={expanded === 'panel9'} onChange={handleChange('panel9')}>
         <AccordionSummary aria-controls="panel9d-content" id="panel9d-header">
           <Typography component="span">修理</Typography>
@@ -200,10 +232,10 @@ export default function Accordions_Plane() {
          <FormControlLabel  control={<Checkbox />} label="滑走路内着陸" />
           </FormGroup>
         </AccordionDetails>
+        </Accordion>
         
-     
         
-      </Accordion>
+      
 
     </div>
   );

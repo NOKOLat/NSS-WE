@@ -27,7 +27,8 @@ const Accordion = styled((props: AccordionProps) => (
   '&::before': {
     display: 'none',
   },
-
+  backgroundColor: '#262e40', // 背景を黒に設定
+  color: '#fff', 
 
   width: '500px', 
   margin: '0 auto', // 中央揃え
@@ -37,7 +38,7 @@ const Accordion = styled((props: AccordionProps) => (
 
 const AccordionSummary = styled((props: AccordionSummaryProps) => (
   <MuiAccordionSummary
-    expandIcon={<ArrowForwardIosSharpIcon sx={{ fontSize: '0.9rem' }} />}
+    expandIcon={<ArrowForwardIosSharpIcon sx={{ fontSize: '0.9rem', color: '#fff'  }} />}
     {...props}
   />
 ))(({ theme }) => ({
@@ -51,7 +52,7 @@ const AccordionSummary = styled((props: AccordionSummaryProps) => (
     marginLeft: theme.spacing(1),
   },
   ...theme.applyStyles('dark', {
-    backgroundColor: 'rgba(255, 255, 255, .05)',
+    backgroundColor: 'rgba(255, 255, 255, 0.63)',
   }),
 }));
 
@@ -88,13 +89,13 @@ export default function Accordions_Multicopter() {
           <Counter></Counter>
           <Box>物資大</Box>
           <FormGroup>
-          <FormControlLabel control={<Checkbox />} label="回収成功" />
+          <FormControlLabel control={<Checkbox　sx={{ color: '#fff',  }} />} label="回収成功" />
         </FormGroup>
         <FormGroup>
-          <FormControlLabel control={<Checkbox />} label="正解" />
+          <FormControlLabel control={<Checkbox sx={{ color: '#fff',  }} />} label="正解" />
         </FormGroup>
         <FormGroup>
-          <FormControlLabel control={<Checkbox />} label="不正解" />
+          <FormControlLabel control={<Checkbox sx={{ color: '#fff',  }}/>} label="不正解" />
         </FormGroup>
           <Stopwatch></Stopwatch>
 
@@ -106,11 +107,11 @@ export default function Accordions_Multicopter() {
         </AccordionSummary>
         <AccordionDetails>
         <FormGroup>
-        <FormControlLabel control={<Checkbox />} label="運搬" />
+        <FormControlLabel control={<Checkbox sx={{ color: '#fff',  }}/>} label="運搬" />
          </FormGroup>
 
          <FormGroup>
-         <FormControlLabel  control={<Checkbox />} label="着陸" />
+         <FormControlLabel  control={<Checkbox sx={{ color: '#fff',  }}/>} label="着陸" />
           </FormGroup>
 
         </AccordionDetails>
@@ -121,11 +122,11 @@ export default function Accordions_Multicopter() {
         </AccordionSummary>
         <AccordionDetails>
         <FormGroup>
-        <FormControlLabel control={<Checkbox />} label="ハンズオフ飛行" />
+        <FormControlLabel control={<Checkbox sx={{ color: '#fff',  }}/>} label="ハンズオフ飛行" />
          </FormGroup>
 
          <FormGroup>
-         <FormControlLabel  control={<Checkbox />} label="成功" />
+         <FormControlLabel  control={<Checkbox sx={{ color: '#fff',  }}/>} label="成功" />
           </FormGroup>
         </AccordionDetails>
         
@@ -137,7 +138,7 @@ export default function Accordions_Multicopter() {
         <AccordionDetails>
         <Stopwatch></Stopwatch>
         <FormGroup>
-         <FormControlLabel  control={<Checkbox />} label="ハンズオフ飛行" />
+         <FormControlLabel  control={<Checkbox sx={{ color: '#fff',  }}/>} label="ハンズオフ飛行" />
           </FormGroup>
         </AccordionDetails>
         
@@ -151,16 +152,35 @@ export default function Accordions_Multicopter() {
         
 
         <FormGroup>
-         <FormControlLabel  control={<Checkbox />} label="成功" />
+         <FormControlLabel  control={<Checkbox sx={{ color: '#fff',  }}/>} label="成功" />
           </FormGroup>
           <Box sx={{ mt: 2 }}>
             <Typography component="span" sx={{ mr: 1 }}>
               数値を入力してください:
             </Typography>
-          <TextField
+          <TextField 
             type="number"
             variant="outlined"
             size="small"
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': {
+                  borderColor: '#1976d2', // 枠線の色
+                },
+                '&:hover fieldset': {
+                  borderColor: '#1565c0', // ホバー時の枠線の色
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: '#004ba0', // フォーカス時の枠線の色
+                },
+              },
+              '& .MuiInputBase-input': {
+                color: '#fff', // テキストの色
+              },
+              '& .MuiInputLabel-root': {
+                color: '#fff', // ラベルの色
+              },
+            }}
             onChange={(e) => console.log(e.target.value)} // 必要に応じて値を処理
           />
          </Box>
@@ -174,7 +194,7 @@ export default function Accordions_Multicopter() {
         <AccordionDetails>
         <Stopwatch></Stopwatch>
         <FormGroup>
-         <FormControlLabel  control={<Checkbox />} label="ハンズオフ飛行" />
+         <FormControlLabel  control={<Checkbox sx={{ color: '#fff',  }}/>} label="ハンズオフ飛行" />
           </FormGroup>
          
          </AccordionDetails>
@@ -197,8 +217,8 @@ export default function Accordions_Multicopter() {
         </AccordionSummary>
         <AccordionDetails>
         <FormGroup>
-         <FormControlLabel  control={<Checkbox />} label="エリア内接地" />
-         <FormControlLabel  control={<Checkbox />} label="滑走路内着陸" />
+         <FormControlLabel  control={<Checkbox sx={{ color: '#fff',  }}/>} label="エリア内接地" />
+         <FormControlLabel  control={<Checkbox sx={{ color: '#fff',  }}/>} label="滑走路内着陸" />
           </FormGroup>
         </AccordionDetails>
         

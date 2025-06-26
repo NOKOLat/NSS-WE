@@ -1,5 +1,19 @@
 import { useState } from 'react';
 import {Button, Box, Stack} from '@mui/material'
+import { styled } from '@mui/material/styles';
+
+const StyledButton = styled(Button)(({ theme }) => ({
+  backgroundColor: '#b3bcd1', // ボタンの背景色
+  color: '#000', // ボタンの文字色
+  '&:hover': {
+    backgroundColor: '#1565c0', // ホバー時の背景色
+  },
+}));
+
+
+
+
+
 
 export default function Counter() {
   const [score, setscore] = useState(0);
@@ -15,8 +29,8 @@ export default function Counter() {
   return (
     <Stack direction={'row'} spacing={1.5} sx={{justifyContent: 'center',alignItems:'center',p:0.5}}>
       <Box sx={{hight:'100%',display:'flex',justifyContent: 'center',alignItems:'center',p:0}}>{score}</Box>
-      <Button onClick={() => {decrement();}} variant='outlined'>-1</Button>
-      <Button onClick={() => {increment();}} variant='outlined'>+1</Button>
+      <StyledButton onClick={() => {decrement();}} variant='outlined'>-1</StyledButton>
+      <StyledButton onClick={() => {increment();}} variant='outlined'>+1</StyledButton>
     </Stack>
   );
 }
