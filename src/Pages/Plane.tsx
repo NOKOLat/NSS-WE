@@ -23,40 +23,20 @@ export default function Plane(props: Props) {
   };
 
   return (
-    <div style={{ backgroundColor: '#fff', minHeight: '100vh', color: '#000' }}>
-
-      <CssBaseline />
-      <CommonToolbar
-        drawerWidth={drawerWidth}
-        handleDrawerToggle={handleDrawerToggle}
-      />
-      <Toolbar />
-      <Container>
-       
+    <React.Fragment>
         <ResponsiveDrawer>
-         
-          
-            <Typography variant="h5" component="h3" gutterBottom>
-              一般部門
-            </Typography>
-        
-        
-           <Typography variant="body1">チーム名</Typography>
-        
-           <Typography variant="body1">得点</Typography>
+          <Typography variant="h5" component="h3" gutterBottom>一般部門</Typography>
+          <Typography variant="body1">チーム名</Typography>
+          <Typography variant="body1">得点</Typography>
           <Stopwatch />
         
 
-<React.StrictMode>
-
-        
+          <React.StrictMode>        
             <Accordions_Plane/>
-            
           </React.StrictMode>
 
         </ResponsiveDrawer>
-      </Container>
-    </div>
+    </React.Fragment>
   );
 }
 
