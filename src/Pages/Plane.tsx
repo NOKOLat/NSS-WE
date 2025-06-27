@@ -23,7 +23,8 @@ export default function Plane(props: Props) {
   };
 
   return (
-    <React.Fragment>
+    <div style={{ backgroundColor: '#fff', minHeight: '100vh', color: '#000' }}>
+
       <CssBaseline />
       <CommonToolbar
         drawerWidth={drawerWidth}
@@ -55,7 +56,7 @@ export default function Plane(props: Props) {
 
         </ResponsiveDrawer>
       </Container>
-    </React.Fragment>
+    </div>
   );
 }
 
