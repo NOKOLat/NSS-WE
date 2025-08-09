@@ -4,6 +4,7 @@ import Stopwatch from '../Components/Timer';
 import '../App.css';
 import Accordions_Multicopter from '../Accordions/Accordion-multicopter';
 import Typography from '@mui/material/Typography';
+import UnixTimestamp from '../Data/time';
 
 export default function Multicopter() {
   return (
@@ -13,6 +14,7 @@ export default function Multicopter() {
           <Typography variant="h5" component="h3" gutterBottom>マルコプ部門</Typography>
           <Typography variant="body1">チーム名</Typography>
           <Typography variant="body1">得点</Typography>
+          <UnixTimestamp />
          
           <Stopwatch />
 
