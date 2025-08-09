@@ -8,10 +8,7 @@ import Checkbox from '@mui/material/Checkbox';
 import { styled } from '@mui/material/styles';
 import ArrowForwardIosSharpIcon from '@mui/icons-material/ArrowForwardIosSharp';
 import MuiAccordion, { AccordionProps } from '@mui/material/Accordion';
-import MuiAccordionSummary, {
-  AccordionSummaryProps,
-  accordionSummaryClasses,
-} from '@mui/material/AccordionSummary';
+import MuiAccordionSummary, {AccordionSummaryProps,accordionSummaryClasses,} from '@mui/material/AccordionSummary';
 import MuiAccordionDetails from '@mui/material/AccordionDetails';
 import Counter from '../Components/Counter.tsx'
 import Stopwatch from '../Components/Timer.tsx'
@@ -79,15 +76,15 @@ export default function Accordions_Plane() {
         <AccordionDetails>
          
         <FormGroup>
-          <FormControlLabel control={<Checkbox />} label="メインミッション成功" />
+          <FormControlLabel control={<Checkbox  id= "success" />} label="メインミッション成功" />
         </FormGroup>
 
           <Box>エリア１</Box>
-          <Counter></Counter>
+          <Counter id= "area1" />
           <Box>エリア2</Box>
-          <Counter></Counter>
+          <Counter id= "area2" />
           <Box>エリア3</Box>
-          <Counter></Counter>
+          <Counter  id= "area3" />
           <Stopwatch></Stopwatch>
 
         </AccordionDetails>
@@ -98,11 +95,11 @@ export default function Accordions_Plane() {
         </AccordionSummary>
         <AccordionDetails>
         <FormGroup>
-        <FormControlLabel control={<Checkbox />} label="回収成功" />
+        <FormControlLabel control={<Checkbox id="isCollected" />} label="回収成功" />
          </FormGroup>
 
          <FormGroup>
-         <FormControlLabel  control={<Checkbox />} label="着陸成功" />
+         <FormControlLabel  control={<Checkbox id="isLanded" />} label="着陸成功" />
           </FormGroup>
 
         </AccordionDetails>
@@ -122,9 +119,9 @@ export default function Accordions_Plane() {
         </AccordionSummary>
         <AccordionDetails>
         <Box>回数</Box>
-        <Counter></Counter>
+        <Counter id=  "count" />
         <Box>連続旋回</Box>
-          <Counter></Counter>
+          <Counter id=  "continousCount" />
         </AccordionDetails>
         
       </Accordion>
@@ -134,10 +131,10 @@ export default function Accordions_Plane() {
         </AccordionSummary>
         <AccordionDetails>
         <Box>回数</Box>
-        <Counter></Counter>
+        <Counter id= "count" />
 
         <FormGroup>
-         <FormControlLabel  control={<Checkbox />} label="連続水平旋回" />
+         <FormControlLabel  control={<Checkbox id= "isCotinous" />} label="連続水平旋回" />
           </FormGroup>
         </AccordionDetails>
         
@@ -148,10 +145,10 @@ export default function Accordions_Plane() {
         </AccordionSummary>
         <AccordionDetails>
         <FormGroup>
-         <FormControlLabel  control={<Checkbox />} label="ハンズオフ飛行" />
+         <FormControlLabel  control={<Checkbox id= "isHandsOff"  />} label="ハンズオフ飛行" />
           </FormGroup>
           <FormGroup>
-         <FormControlLabel  control={<Checkbox />} label="成功" />
+         <FormControlLabel  control={<Checkbox id="isSuccess" />} label="成功" />
           </FormGroup>
         </AccordionDetails>
         
@@ -162,7 +159,7 @@ export default function Accordions_Plane() {
         </AccordionSummary>
         <AccordionDetails>
         <Box>回数</Box>
-        <Counter></Counter>
+        <Counter id="count" />
         </AccordionDetails>
         
       </Accordion>
@@ -172,10 +169,10 @@ export default function Accordions_Plane() {
         </AccordionSummary>
         <AccordionDetails>
         <FormGroup>
-         <FormControlLabel  control={<Checkbox />} label="回収成功" />
+         <FormControlLabel  control={<Checkbox id= "isCollected"/>} label="回収成功" />
           </FormGroup>
           <FormGroup>
-         <FormControlLabel  control={<Checkbox />} label="着陸成功" />
+         <FormControlLabel  control={<Checkbox id= "isLanded" />} label="着陸成功" />
           </FormGroup>
         </AccordionDetails>
       
@@ -227,9 +224,9 @@ export default function Accordions_Plane() {
         </AccordionSummary>
         <AccordionDetails>
         <FormGroup>
-         <FormControlLabel  control={<Checkbox />} label="エリア内接地" />
-         <FormControlLabel  control={<Checkbox />} label="エリア内静止" />
-         <FormControlLabel  control={<Checkbox />} label="滑走路内着陸" />
+         <FormControlLabel  control={<Checkbox id=  "isAreaTouchDown" />} label="エリア内接地" />
+         <FormControlLabel  control={<Checkbox id= "isInAreaStop"  />} label="エリア内静止" />
+         <FormControlLabel  control={<Checkbox id="isRunwayLanding" />} label="滑走路内着陸" />
           </FormGroup>
         </AccordionDetails>
         </Accordion>

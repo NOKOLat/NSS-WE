@@ -82,21 +82,17 @@ export default function Accordions_Multicopter() {
          
       
           <Box>投下エリア</Box>
-          <Counter></Counter>
-          <Box>正解箱</Box>
-          <Counter></Counter>
-          <Box>不正解箱</Box>
-          <Counter></Counter>
-          <Box>物資大</Box>
+          <Counter id= "droparea" />
+          <Box>高所運搬</Box>
+          <Counter id="box" />
+          
           <FormGroup>
-          <FormControlLabel control={<Checkbox　sx={{ color: '#fff',  }} />} label="回収成功" />
+          <FormControlLabel control={<Checkbox　id= "isCollect" sx={{ color: '#fff',  }} />} label="救援物資（大）回収成功" />
         </FormGroup>
         <FormGroup>
-          <FormControlLabel control={<Checkbox sx={{ color: '#fff',  }} />} label="正解" />
+          <FormControlLabel control={<Checkbox id="isDrropedToBox" sx={{ color: '#fff',  }} />} label="救援物資（大）運搬成功" />
         </FormGroup>
-        <FormGroup>
-          <FormControlLabel control={<Checkbox sx={{ color: '#fff',  }}/>} label="不正解" />
-        </FormGroup>
+        
           <Stopwatch></Stopwatch>
 
         </AccordionDetails>
@@ -107,11 +103,11 @@ export default function Accordions_Multicopter() {
         </AccordionSummary>
         <AccordionDetails>
         <FormGroup>
-        <FormControlLabel control={<Checkbox sx={{ color: '#fff',  }}/>} label="運搬" />
+        <FormControlLabel control={<Checkbox id="isTransported" sx={{ color: '#fff',  }}/>} label="運搬" />
          </FormGroup>
 
          <FormGroup>
-         <FormControlLabel  control={<Checkbox sx={{ color: '#fff',  }}/>} label="着陸" />
+         <FormControlLabel  control={<Checkbox id = "isLanded" sx={{ color: '#fff',  }}/>} label="着陸" />
           </FormGroup>
 
         </AccordionDetails>
@@ -122,11 +118,11 @@ export default function Accordions_Multicopter() {
         </AccordionSummary>
         <AccordionDetails>
         <FormGroup>
-        <FormControlLabel control={<Checkbox sx={{ color: '#fff',  }}/>} label="ハンズオフ飛行" />
+        <FormControlLabel control={<Checkbox id="isHandsOff" sx={{ color: '#fff',  }}/>} label="ハンズオフ飛行" />
          </FormGroup>
 
          <FormGroup>
-         <FormControlLabel  control={<Checkbox sx={{ color: '#fff',  }}/>} label="成功" />
+         <FormControlLabel  control={<Checkbox id= "isSuccess" sx={{ color: '#fff',  }}/>} label="成功" />
           </FormGroup>
         </AccordionDetails>
         
@@ -138,7 +134,7 @@ export default function Accordions_Multicopter() {
         <AccordionDetails>
         <Stopwatch></Stopwatch>
         <FormGroup>
-         <FormControlLabel  control={<Checkbox sx={{ color: '#fff',  }}/>} label="ハンズオフ飛行" />
+         <FormControlLabel  control={<Checkbox id= "isHandsOff" sx={{ color: '#fff',  }}/>} label="ハンズオフ飛行" />
           </FormGroup>
         </AccordionDetails>
         
@@ -150,11 +146,10 @@ export default function Accordions_Multicopter() {
         <AccordionDetails>
         <Stopwatch></Stopwatch>
         
-
         <FormGroup>
-         <FormControlLabel  control={<Checkbox sx={{ color: '#fff',  }}/>} label="成功" />
+         <FormControlLabel  control={<Checkbox id= "isSuccess" sx={{ color: '#fff',  }}/>} label="成功" />
           </FormGroup>
-          <Box sx={{ mt: 2 }}>
+          <Box id ="score" sx={{ mt: 2 }}>
             <Typography component="span" sx={{ mr: 1 }}>
               数値を入力してください:
             </Typography>
@@ -194,7 +189,7 @@ export default function Accordions_Multicopter() {
         <AccordionDetails>
         <Stopwatch></Stopwatch>
         <FormGroup>
-         <FormControlLabel  control={<Checkbox sx={{ color: '#fff',  }}/>} label="ハンズオフ飛行" />
+         <FormControlLabel  control={<Checkbox id="isHandsOff" sx={{ color: '#fff',  }}/>} label="ハンズオフ飛行" />
           </FormGroup>
          
          </AccordionDetails>
@@ -217,8 +212,8 @@ export default function Accordions_Multicopter() {
         </AccordionSummary>
         <AccordionDetails>
         <FormGroup>
-         <FormControlLabel  control={<Checkbox sx={{ color: '#fff',  }}/>} label="エリア内接地" />
-         <FormControlLabel  control={<Checkbox sx={{ color: '#fff',  }}/>} label="滑走路内着陸" />
+         <FormControlLabel  control={<Checkbox id= "isAreaTouchDown" sx={{ color: '#fff',  }}/>} label="エリア内接地" />
+         <FormControlLabel  control={<Checkbox id= "isInAreaStop"  sx={{ color: '#fff',  }}/>} label="滑走路内着陸" />
           </FormGroup>
         </AccordionDetails>
         

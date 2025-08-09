@@ -11,10 +11,6 @@ const StyledButton = styled(Button)(({ theme }) => ({
 }));
 
 
-
-
-
-
 export default function Counter() {
   const [score, setscore] = useState(0);
 
@@ -27,10 +23,16 @@ export default function Counter() {
   }
 
   return (
-    <Stack direction={'row'} spacing={1.5} sx={{justifyContent: 'center',alignItems:'center',p:0.5}}>
-      <Box sx={{hight:'100%',display:'flex',justifyContent: 'center',alignItems:'center',p:0}}>{score}</Box>
-      <StyledButton onClick={() => {decrement();}} variant='outlined'>-1</StyledButton>
-      <StyledButton onClick={() => {increment();}} variant='outlined'>+1</StyledButton>
+    <Stack direction={'row'} spacing={1.5} sx={{justifyContent: 'center', alignItems:'center',p:0.5 }}>
+      <Box sx={{hight:'100%',display:'flex',justifyContent: 'center',alignItems:'center',p:0}}>
+        {score}
+      </Box>
+      <StyledButton onClick={() => {decrement();}} variant='outlined'>
+        -1
+      </StyledButton>
+      <StyledButton onClick={() => {increment();}} variant='outlined'>
+        +1
+      </StyledButton>
     </Stack>
   );
 }
