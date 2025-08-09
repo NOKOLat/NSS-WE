@@ -110,6 +110,9 @@ export default function Accordions_Plane() {
         </AccordionSummary>
         <AccordionDetails>
           <Stopwatch></Stopwatch>
+          <FormGroup>
+         <FormControlLabel  control={<Checkbox id= "isHandsOff" />} label="ハンズオフ成功" />
+          </FormGroup>
         </AccordionDetails>
         
       </Accordion>
@@ -160,6 +163,11 @@ export default function Accordions_Plane() {
         <AccordionDetails>
         <Box>回数</Box>
         <Counter id="count" />
+         <FormGroup>
+         <FormControlLabel  control={<Checkbox id= "isHandsOff" />} label="ハンズオフ成功" />
+          </FormGroup>
+
+         
         </AccordionDetails>
         
       </Accordion>
