@@ -13,6 +13,7 @@ import AirplanemodeActiveIcon from '@mui/icons-material/AirplanemodeActive';
 import WindPowerIcon from '@mui/icons-material/WindPower';
 import CommonToolbar from './CommonToolbar';
 import { useNavigate } from 'react-router-dom';
+import AccessAlarmIcon from '@mui/icons-material/AccessAlarm';
 
 const drawerWidth = 240;
 
@@ -42,12 +43,18 @@ export default function ResponsiveDrawer(props: Props) {
     }
   };
 
+  const icons = [
+    <AirplanemodeActiveIcon />,
+    <WindPowerIcon />,
+    <AccessAlarmIcon />
+  ];
+
   const drawer = (
     <div>
       <Toolbar />
       <Divider />
       <List>
-        {['一般部門', 'マルコプ部門'].map((text, index) => (
+        {['一般部門', 'マルコプ部門', '時間合わせ'].map((text, index) => (
           <ListItem key={text} disablePadding>
             <ListItemButton
               onClick={() => {
@@ -55,11 +62,13 @@ export default function ResponsiveDrawer(props: Props) {
                   navigate('/');
                 } else if (text === 'マルコプ部門') {
                   navigate('/marcop');
+                } else if (text === '時間合わせ') {
+                  navigate('/time');
                 }
               }}
             >
               <ListItemIcon>
-                {index % 2 === 0 ? <AirplanemodeActiveIcon /> : <WindPowerIcon />}
+                {icons[index]}
               </ListItemIcon>
               <ListItemText primary={text} />
             </ListItemButton>

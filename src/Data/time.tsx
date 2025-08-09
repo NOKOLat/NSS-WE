@@ -5,7 +5,7 @@ export default function UnixTimestamp() {
   const now = new Date();
 
   // UNIXタイムスタンプを取得（ミリ秒単位なので、1000で割って秒単位に変換）
-  const unixTimestamp = Math.floor(now.getTime() / 1000);
+  const unixTimestamp = Math.floor(now.getTime() );
 
   return (
     <div>
@@ -13,3 +13,5 @@ export default function UnixTimestamp() {
     </div>
   );
 }
+
+
