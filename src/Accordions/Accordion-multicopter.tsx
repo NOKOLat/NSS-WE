@@ -16,6 +16,7 @@ import MuiAccordionDetails from '@mui/material/AccordionDetails';
 import Counter from '../Components/Counter';
 import Stopwatch from '../Components/Timer'
 import TextField from '@mui/material/TextField';
+import { createButtonClickData, saveJsonToFile } from '../Data/handleButtonClick.tsx';
 
 const Accordion = styled((props: AccordionProps) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
@@ -33,8 +34,6 @@ const Accordion = styled((props: AccordionProps) => (
   width: '500px', 
   margin: '0 auto', // 中央揃え
 }));
-
-
 
 const AccordionSummary = styled((props: AccordionSummaryProps) => (
   <MuiAccordionSummary
@@ -61,9 +60,6 @@ const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
   borderTop: '1px solid rgba(0, 0, 0, .125)',
 }));
 
-
-
-
 export default function Accordions_Multicopter() {
   const [expanded, setExpanded] = React.useState<string | false>('panel1');
 
@@ -72,28 +68,76 @@ export default function Accordions_Multicopter() {
       setExpanded(newExpanded ? panel : false);
     };
 
+  const handleButtonClick = (id: string, parentId?: string) => {
+    let jsonData;
+    if (parentId) {
+      jsonData = {
+        action: "update",
+        category: "multicopter",
+        epoch: Date.now(),
+        params: {
+          [parentId]: {
+            [id]: 1
+          }
+        }
+      };
+    } else {
+      jsonData = createButtonClickData(id);
+    }
+    console.log(JSON.stringify(jsonData, null, 2));
+    saveJsonToFile(jsonData);
+  };
+
   return (
     <div>
       <Accordion expanded={expanded === 'panel1'} onChange={handleChange('panel1')}>
-        <AccordionSummary aria-controls="panel1d-content" id="panel1d-header">
+        <AccordionSummary aria-controls="panel1d-content" id="mainmission">
           <Typography component="span">メインミッション</Typography>
         </AccordionSummary>
         <AccordionDetails>
-         
-      
           <Box>投下エリア</Box>
-          <Counter id= "droparea" />
+          <Counter 
+            id="droparea" 
+            onClick={() => handleButtonClick("droparea", "mainmission")}
+          />
           <Box>高所運搬</Box>
-          <Counter id="box" />
+          <Counter 
+            id="box"
+            onClick={() => handleButtonClick("box", "mainmission")}
+          />
           
           <FormGroup>
-          <FormControlLabel control={<Checkbox　id= "isCollect" sx={{ color: '#fff',  }} />} label="救援物資（大）回収成功" />
+          <FormControlLabel
+  control={
+    <Checkbox
+      id="isCollect"
+      sx={{ color: '#fff' }}
+      onChange={(e) => {
+        const checkboxId = `mainmission_collect_${e.target.checked ? 'checked' : 'unchecked'}`;
+        handleButtonClick(checkboxId);
+      }}
+    />
+  }
+  label="救援物資（大）回収成功"
+/>
         </FormGroup>
         <FormGroup>
-          <FormControlLabel control={<Checkbox id="isDrropedToBox" sx={{ color: '#fff',  }} />} label="救援物資（大）運搬成功" />
+          <FormControlLabel control={
+            <Checkbox
+             id="isDrropedToBox" 
+             sx={{ color: '#fff',  }} 
+             onChange={(e) => {
+        const checkboxId = `isDrropedToBox_${e.target.checked ? 'checked' : 'unchecked'}`;
+        handleButtonClick(checkboxId);
+      }}/>} 
+          
+          label="救援物資（大）運搬成功" />
         </FormGroup>
         
-          <Stopwatch></Stopwatch>
+          <Stopwatch 
+            id="mainmission_timer"
+            onClick={(buttonId) => handleButtonClick(buttonId)}
+          />
 
         </AccordionDetails>
       </Accordion>
@@ -103,7 +147,19 @@ export default function Accordions_Multicopter() {
         </AccordionSummary>
         <AccordionDetails>
         <FormGroup>
-        <FormControlLabel control={<Checkbox id="isTransported" sx={{ color: '#fff',  }}/>} label="運搬" />
+        <FormControlLabel
+  control={
+    <Checkbox
+      id="isTransported"
+      sx={{ color: '#fff' }}
+      onChange={(e) => {
+        const checkboxId = `cargo_transport_${e.target.checked ? 'checked' : 'unchecked'}`;
+        handleButtonClick(checkboxId);
+      }}
+    />
+  }
+  label="運搬"
+/>
          </FormGroup>
 
          <FormGroup>
@@ -118,7 +174,19 @@ export default function Accordions_Multicopter() {
         </AccordionSummary>
         <AccordionDetails>
         <FormGroup>
-        <FormControlLabel control={<Checkbox id="isHandsOff" sx={{ color: '#fff',  }}/>} label="ハンズオフ飛行" />
+        <FormControlLabel
+  control={
+    <Checkbox
+      id="isHandsOff"
+      sx={{ color: '#fff' }}
+      onChange={(e) => {
+        const checkboxId = `eight_handsoff_${e.target.checked ? 'checked' : 'unchecked'}`;
+        handleButtonClick(checkboxId);
+      }}
+    />
+  }
+  label="ハンズオフ飛行"
+/>
          </FormGroup>
 
          <FormGroup>
@@ -132,7 +200,10 @@ export default function Accordions_Multicopter() {
           <Typography component="span">耐故障制御</Typography>
         </AccordionSummary>
         <AccordionDetails>
-        <Stopwatch></Stopwatch>
+        <Stopwatch 
+          id="failsafe_timer"
+          onClick={(buttonId) => handleButtonClick(buttonId)}
+        />
         <FormGroup>
          <FormControlLabel  control={<Checkbox id= "isHandsOff" sx={{ color: '#fff',  }}/>} label="ハンズオフ飛行" />
           </FormGroup>
@@ -144,7 +215,10 @@ export default function Accordions_Multicopter() {
           <Typography component="span">ユニークミッション</Typography>
         </AccordionSummary>
         <AccordionDetails>
-        <Stopwatch></Stopwatch>
+        <Stopwatch 
+          id="unique_timer"
+          onClick={(buttonId) => handleButtonClick(buttonId)}
+        />
         
         <FormGroup>
          <FormControlLabel  control={<Checkbox id= "isSuccess" sx={{ color: '#fff',  }}/>} label="成功" />
@@ -187,7 +261,10 @@ export default function Accordions_Multicopter() {
           <Typography component="span">ホバリング</Typography>
         </AccordionSummary>
         <AccordionDetails>
-        <Stopwatch></Stopwatch>
+        <Stopwatch 
+          id="hovering_timer"
+          onClick={(buttonId) => handleButtonClick(buttonId)}
+        />
         <FormGroup>
          <FormControlLabel  control={<Checkbox id="isHandsOff" sx={{ color: '#fff',  }}/>} label="ハンズオフ飛行" />
           </FormGroup>
@@ -202,7 +279,10 @@ export default function Accordions_Multicopter() {
           <Typography component="span">修理</Typography>
         </AccordionSummary>
         <AccordionDetails>
-        <Stopwatch></Stopwatch>
+        <Stopwatch 
+          id="repair_timer"
+          onClick={(buttonId) => handleButtonClick(buttonId)}
+        />
         </AccordionDetails>
         
       </Accordion>

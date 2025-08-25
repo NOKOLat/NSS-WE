@@ -29,57 +29,66 @@ const StopButton = styled(Button)(({ theme }) => ({
   
 
 
-function Stopwatch() {
-    const [time, setTime] = useState(0);
-    const [isRunning, setIsRunning] = useState(false);
-    
-    const intervalRef = useRef<number | null>(null);
+interface StopwatchProps {
+  id: string;
+  onClick: (action: string, timestamp: number) => void;
+}
 
-    function handleStart() {
-        setIsRunning(true);
-        intervalRef.current = window.setInterval(() => {
-            setTime(prevTime => prevTime + 10);
-        }, 10);
+function Stopwatch({ id, onClick }: StopwatchProps) {
+  const [time, setTime] = useState(0);
+  const [isRunning, setIsRunning] = useState(false);
+  const intervalRef = useRef<number | null>(null);
+
+  function handleStart() {
+    setIsRunning(true);
+    const timestamp = Date.now();
+    onClick('start', timestamp); // 必ず呼び出されるように修正
+
+    intervalRef.current = window.setInterval(() => {
+      setTime(prevTime => prevTime + 10);
+    }, 10);
+  }
+
+  function handlePause() {
+    if (intervalRef.current !== null) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
     }
+    setIsRunning(false);
+    const timestamp = Date.now();
+    onClick('stop', timestamp); // 必ず呼び出されるように修正
+  }
 
-    function handlePause() {
-        if (intervalRef.current !== null) {
-            clearInterval(intervalRef.current);
-            intervalRef.current = null; 
-        }
-        setIsRunning(false);
-    }
-
-    function handleReset() {
-        if (intervalRef.current !== null) {
-            clearInterval(intervalRef.current);
-            intervalRef.current = null; 
-        }
-        setIsRunning(false);
-        setTime(0);
-    }
-
-    const milliseconds = `0${(time % 1000) / 10}`.slice(-2);
-    const seconds = `0${Math.floor(time / 1000) % 60}`.slice(-2);
-    const minutes = `0${Math.floor(time / 60000) % 60}`.slice(-2);
+  const milliseconds = `0${(time % 1000) / 10}`.slice(-2);
+  const seconds = `0${Math.floor(time / 1000) % 60}`.slice(-2);
+  const minutes = `0${Math.floor(time / 60000) % 60}`.slice(-2);
   
 
-    return (
-        <Box sx={{p:1}}>
+  return (
+      <Box sx={{ p: 1 }}>
         <Stack>
-            <Box>計測時間</Box>
-            <Box>{minutes}:{seconds}:{milliseconds}</Box>
-            <Stack direction={'row'} spacing={1} sx={{justifyContent: 'center',alignItems:'center'}}>
+          <Box>計測時間</Box>
+          <Box>{minutes}:{seconds}:{milliseconds}</Box>
+          <Stack direction={'row'} spacing={1} sx={{ justifyContent: 'center', alignItems: 'center' }}>
             {isRunning ? (
-                <StopButton onClick={handlePause} variant='outlined'>Stop</StopButton>
+              <StopButton 
+                onClick={handlePause} 
+                variant='outlined'
+              >
+                Stop
+              </StopButton>
             ) : (
-                <StartButton onClick={handleStart} variant='outlined'>Start</StartButton>
+              <StartButton 
+                onClick={handleStart} 
+                variant='outlined'
+              >
+                Start
+              </StartButton>
             )}
-            <ResetButton onClick={handleReset} variant='outlined'>Reset</ResetButton>
-            </Stack>
-        </Stack> 
-        </Box>
-    );
+          </Stack>
+        </Stack>
+      </Box>
+  );
 }
 
 export default Stopwatch;

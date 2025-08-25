@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import {Button, Box, Stack} from '@mui/material'
+import {Button, Box, Stack, Typography} from '@mui/material'
 import { styled } from '@mui/material/styles';
+import { createButtonClickData, saveJsonToFile } from '../Data/handleButtonClick';
 
 const StyledButton = styled(Button)(({ theme }) => ({
   backgroundColor: '#b3bcd1', // ボタンの背景色
@@ -10,29 +11,61 @@ const StyledButton = styled(Button)(({ theme }) => ({
   },
 }));
 
+interface CounterProps {
+  id: string;
+  onClick?: (action: string) => void;
+}
 
-export default function Counter() {
-  const [score, setscore] = useState(0);
+const Counter: React.FC<CounterProps> = ({ id, onClick }) => {
+  const [count, setCount] = useState(0);
 
-  function increment() {
-    setscore(a => a + 1);
-  }
+  const handleIncrement = () => {
+    setCount(prev => prev + 1);
+    console.log('Increment button clicked'); // ←デバッグログ追加
+    if (onClick) {
+      onClick(`${id}_increment`);
+    }
+  };
 
-  function decrement() {
-    setscore(a => (a > 0 ? a - 1 : a)); // 0未満にならないように条件を追加
-  }
+  const handleDecrement = () => {
+    setCount(prev => Math.max(0, prev - 1));
+    console.log('Decrement button clicked'); // ←デバッグログ追加
+    if (onClick) {
+      onClick(`${id}_decrement`);
+    }
+  };
 
   return (
-    <Stack direction={'row'} spacing={1.5} sx={{justifyContent: 'center', alignItems:'center',p:0.5 }}>
-      <Box sx={{hight:'100%',display:'flex',justifyContent: 'center',alignItems:'center',p:0}}>
-        {score}
-      </Box>
-      <StyledButton onClick={() => {decrement();}} variant='outlined'>
-        -1
-      </StyledButton>
-      <StyledButton onClick={() => {increment();}} variant='outlined'>
-        +1
-      </StyledButton>
-    </Stack>
+    <Box 
+      sx={{ 
+        p: 1,
+        display: 'flex',
+        justifyContent: 'center',  // 水平方向の中央揃え
+        width: '100%'  // 親要素の幅いっぱいに広げる
+      }}
+    >
+      <Stack 
+        direction="row" 
+        spacing={2} 
+        alignItems="center"  // 垂直方向の中央揃え
+        justifyContent="center"  // 水平方向の中央揃え
+      >
+        <StyledButton 
+          onClick={handleDecrement}
+          variant="outlined"
+        >
+          -
+        </StyledButton>
+        <Typography>{count}</Typography>
+        <StyledButton 
+          onClick={handleIncrement}
+          variant="outlined"
+        >
+          +
+        </StyledButton>
+      </Stack>
+    </Box>
   );
 }
+
+export default Counter;
