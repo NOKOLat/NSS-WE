@@ -12,6 +12,8 @@ import MuiAccordionSummary, {AccordionSummaryProps,accordionSummaryClasses,} fro
 import MuiAccordionDetails from '@mui/material/AccordionDetails';
 import Counter from '../Components/Counter.tsx'
 import Stopwatch from '../Components/Timer.tsx'
+import { createButtonClickData, saveJsonToFile } from '../Data/handleButtonClick.tsx';
+
 
 
 const Accordion = styled((props: AccordionProps) => (
@@ -28,8 +30,6 @@ const Accordion = styled((props: AccordionProps) => (
   width: '500px', 
   margin: '0 auto', // 中央揃え
 }));
-
-
 
 const AccordionSummary = styled((props: AccordionSummaryProps) => (
   <MuiAccordionSummary
@@ -56,7 +56,48 @@ const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
   borderTop: '1px solid rgba(0, 0, 0, .125)',
 }));
 
+const handleButtonClick = (id: string, event: React.MouseEvent<HTMLElement>) => {
+  // イベントとIDのデバッグログ
+  console.log('Button clicked:', id);
+  console.log('Event:', event);
 
+  try {
+    // 親要素を見つける
+    const accordion = event?.currentTarget?.closest('.MuiAccordion-root');
+    const accordionSummary = accordion?.querySelector('.MuiAccordionSummary-root');
+    
+    // IDを取得して、デバッグログを出力
+    const category = accordion?.id ;
+    const section = accordionSummary?.id ;
+    console.log('Category:', category);
+    console.log('Section:', section);
+
+    // IDの分解
+    const [counterId, action] = id.split('_');
+    console.log('CounterId:', counterId);
+    console.log('Action:', action);
+
+    // JSONデータの生成
+    const jsonData = {
+      action: "update",
+      category: category,
+      epoch: Date.now(),
+      params: {
+        [section]: {
+          [counterId]: action === 'increment' ? 1 : 1
+        }
+      }
+    };
+
+    // 生成したJSONのデバッグ出力
+    console.log('Generated JSON:', JSON.stringify(jsonData, null, 2));
+    
+    // JSONファイルの保存
+    saveJsonToFile(jsonData);
+  } catch (error) {
+    console.error('Error in handleButtonClick:', error);
+  }
+};
 
 
 export default function Accordions_Plane() {
@@ -69,23 +110,46 @@ export default function Accordions_Plane() {
 
   return (
     <div>
-      <Accordion expanded={expanded === 'panel1'} onChange={handleChange('panel1')}>
-        <AccordionSummary aria-controls="panel1d-content" id="panel1d-header">
+      <Accordion 　id="plane"  expanded={expanded === 'panel1'} onChange={handleChange('panel1')}>
+        <AccordionSummary aria-controls="panel1d-content" id="mainmission">
           <Typography component="span">メインミッション</Typography>
         </AccordionSummary>
         <AccordionDetails>
          
         <FormGroup>
-          <FormControlLabel control={<Checkbox  id= "success" />} label="メインミッション成功" />
+          <FormControlLabel
+  control={
+    <Checkbox
+      id="success"
+      onChange={(e) => {
+        const checkboxId = `success_${e.target.checked ? 'checked' : 'unchecked'}`;
+        handleButtonClick(checkboxId, e.nativeEvent);
+      }}
+    />
+  }
+  label="メインミッション成功"
+/>
         </FormGroup>
 
           <Box>エリア１</Box>
-          <Counter id= "area1" />
+          <Counter 
+            id="mainmission_area1" 
+            onClick={(actionId) => handleButtonClick("area1")}
+          />
           <Box>エリア2</Box>
-          <Counter id= "area2" />
+          <Counter 
+            id="mainmission_area2"
+            onClick={() => handleButtonClick("area2")}
+          />
           <Box>エリア3</Box>
-          <Counter  id= "area3" />
-          <Stopwatch></Stopwatch>
+          <Counter  
+           id="area3"
+           onClick={() => handleButtonClick("area3")}
+          />
+          <Stopwatch 
+  id="mainMissionTimer" 
+  onClick={() => handleButtonClick("mainMissionTimer")} 
+/>
 
         </AccordionDetails>
       </Accordion>
@@ -95,7 +159,18 @@ export default function Accordions_Plane() {
         </AccordionSummary>
         <AccordionDetails>
         <FormGroup>
-        <FormControlLabel control={<Checkbox id="isCollected" />} label="回収成功" />
+        <FormControlLabel
+  control={
+    <Checkbox
+      id="isCollected"
+      onChange={(e) => {
+        const checkboxId = `collection_collected_${e.target.checked ? 'checked' : 'unchecked'}`;
+        handleButtonClick(checkboxId);
+      }}
+    />
+  }
+  label="回収成功"
+/>
          </FormGroup>
 
          <FormGroup>
@@ -111,7 +186,18 @@ export default function Accordions_Plane() {
         <AccordionDetails>
           <Stopwatch></Stopwatch>
           <FormGroup>
-         <FormControlLabel  control={<Checkbox id= "isHandsOff" />} label="ハンズオフ成功" />
+         <FormControlLabel
+  control={
+    <Checkbox
+      id="isHandsOff"
+      onChange={(e) => {
+        const checkboxId = `gliding_handsoff_${e.target.checked ? 'checked' : 'unchecked'}`;
+        handleButtonClick(checkboxId);
+      }}
+    />
+  }
+  label="ハンズオフ成功"
+/>
           </FormGroup>
         </AccordionDetails>
         
@@ -122,9 +208,15 @@ export default function Accordions_Plane() {
         </AccordionSummary>
         <AccordionDetails>
         <Box>回数</Box>
-        <Counter id=  "count" />
-        <Box>連続旋回</Box>
-          <Counter id=  "continousCount" />
+        <Counter 
+         id="count"
+         onClick={() => handleButtonClick("count")}
+        />
+<Box>連続旋回</Box>
+<Counter 
+  id="continousCount"
+  onClick={() => handleButtonClick("continousCount")}
+/>
         </AccordionDetails>
         
       </Accordion>
