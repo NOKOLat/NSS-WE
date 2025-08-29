@@ -227,7 +227,7 @@ export default function Accordions_Plane() {
                 <Checkbox
                   id="isHandsOff"
                   onChange={(e) => {
-                    const checkboxId = `handsoff_${e.target.checked ? 'checked' : 'unchecked'}`;
+                    const checkboxId = `isHandsOff_${e.target.checked ? 'checked' : 'unchecked'}`;
                     handleButtonClick(checkboxId, e);
                   }}
                 />
@@ -251,8 +251,8 @@ export default function Accordions_Plane() {
           />
           <Box>連続旋回</Box>
           <Counter 
-            id="continousCount"
-            onClick={(actionId, event) => handleButtonClick(`continousCount_${actionId}`, event)}
+            id="continuousCount"
+            onClick={(actionId, event) => handleButtonClick(`continuousCount_${actionId}`, event)}
           />
         </AccordionDetails>
       </Accordion>
@@ -274,7 +274,7 @@ export default function Accordions_Plane() {
                 <Checkbox 
                   id="isContinuous" 
                   onChange={(e) => {
-                    const checkboxId = `continuous_${e.target.checked ? 'checked' : 'unchecked'}`;
+                    const checkboxId = `isCotinous_${e.target.checked ? 'checked' : 'unchecked'}`;
                     handleButtonClick(checkboxId, e);
                   }}
                 />
@@ -284,10 +284,32 @@ export default function Accordions_Plane() {
           </FormGroup>
         </AccordionDetails>
       </Accordion>
+{/* --- panel6 --- */}
+      <Accordion id="risingLoop" expanded={expanded === 'panel105'} onChange={handleChange('panel105')}>
+        <AccordionSummary aria-controls="panel105d-content" id="risingLoop">
+          <Typography component="span">上昇旋回（自動操縦専用）</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <FormGroup>
+            <FormControlLabel  
+              control={
+                <Checkbox 
+                  id="success" 
+                  onChange={(e) => {
+                    const checkboxId = `success_${e.target.checked ? 'checked' : 'unchecked'}`;
+                    handleButtonClick(checkboxId, e);
+                  }}
+                />
+              } 
+              label="成功" 
+            />
+          </FormGroup>
+        </AccordionDetails>
+      </Accordion>
 
       {/* --- panel6 --- */}
-      <Accordion id="eightFlight" expanded={expanded === 'panel6'} onChange={handleChange('panel6')}>
-        <AccordionSummary aria-controls="panel6d-content" id="eightFlight">
+      <Accordion id="eightTurn" expanded={expanded === 'panel6'} onChange={handleChange('panel6')}>
+        <AccordionSummary aria-controls="panel6d-content" id="eightTurn">
           <Typography component="span">八の字飛行</Typography>
         </AccordionSummary>
         <AccordionDetails>
@@ -323,8 +345,8 @@ export default function Accordions_Plane() {
       </Accordion>
 
       {/* --- panel7 --- */}
-      <Accordion id="looping" expanded={expanded === 'panel7'} onChange={handleChange('panel7')}>
-        <AccordionSummary aria-controls="panel7d-content" id="looping">
+      <Accordion id="loop" expanded={expanded === 'panel7'} onChange={handleChange('panel7')}>
+        <AccordionSummary aria-controls="panel7d-content" id="loop">
           <Typography component="span">宙返り</Typography>
         </AccordionSummary>
         <AccordionDetails>
@@ -351,8 +373,8 @@ export default function Accordions_Plane() {
       </Accordion>
 
       {/* --- panel8 --- */}
-      <Accordion id="highAltitudeCollection" expanded={expanded === 'panel8'} onChange={handleChange('panel8')}>
-        <AccordionSummary aria-controls="panel8d-content" id="highAltitudeCollection">
+      <Accordion id="highCollection" expanded={expanded === 'panel8'} onChange={handleChange('panel8')}>
+        <AccordionSummary aria-controls="panel8d-content" id="highCollection">
           <Typography component="span">高所物資回収</Typography>
         </AccordionSummary>
         <AccordionDetails>
@@ -400,9 +422,60 @@ export default function Accordions_Plane() {
         </AccordionDetails>
       </Accordion>
 
+
+      {/* --- panel6 --- */}
+      <Accordion id="automaticDrop" expanded={expanded === 'panel106'} onChange={handleChange('panel106')}>
+        <AccordionSummary aria-controls="panel106d-content" id="automaticDrop">
+          <Typography component="span">自動物資投下（自動操縦専用）</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <FormGroup>
+            <FormControlLabel  
+              control={
+                <Checkbox 
+                  id="isTakeoffSuccess" 
+                  onChange={(e) => {
+                    const checkboxId = `success_${e.target.checked ? 'checked' : 'unchecked'}`;
+                    handleButtonClick(checkboxId, e);
+                  }}
+                />
+              } 
+              label="自動離陸成功" 
+            />
+          </FormGroup>
+          <FormGroup>
+            <FormControlLabel  
+              control={
+                <Checkbox 
+                  id="isDroppingSuccess" 
+                  onChange={(e) => {
+                    const checkboxId = `success_${e.target.checked ? 'checked' : 'unchecked'}`;
+                    handleButtonClick(checkboxId, e);
+                  }}
+                />
+              } 
+              label="自動投下成功" 
+            />
+          </FormGroup><FormGroup>
+            <FormControlLabel  
+              control={
+                <Checkbox 
+                  id=" isLandingSuccess" 
+                  onChange={(e) => {
+                    const checkboxId = `success_${e.target.checked ? 'checked' : 'unchecked'}`;
+                    handleButtonClick(checkboxId, e);
+                  }}
+                />
+              } 
+              label="自動着陸成功" 
+            />
+          </FormGroup>
+        </AccordionDetails>
+      </Accordion>
+
       {/* --- panel10 --- */}
-      <Accordion id="gameEnd" expanded={expanded === 'panel10'} onChange={handleChange('panel10')}>
-        <AccordionSummary aria-controls="panel10d-content" id="gameEnd">
+      <Accordion id="landing" expanded={expanded === 'panel10'} onChange={handleChange('panel10')}>
+        <AccordionSummary aria-controls="panel10d-content" id="landing">
           <Typography component="span">競技終了</Typography>
         </AccordionSummary>
         <AccordionDetails>
