@@ -81,7 +81,6 @@ const handleButtonClick = (id: string, event?: any) => {
     return;
   }
 
-  // 通常の処理
   let value;
   if (action === 'increment') value = 1;
   else if (action === 'decrement') value = -1;

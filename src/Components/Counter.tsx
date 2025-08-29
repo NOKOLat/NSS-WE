@@ -13,25 +13,23 @@ const StyledButton = styled(Button)(({ theme }) => ({
 
 interface CounterProps {
   id: string;
-  onClick?: (action: string) => void;
+  onClick?: (action: string, event?: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
 const Counter: React.FC<CounterProps> = ({ id, onClick }) => {
   const [count, setCount] = useState(0);
 
-  const handleIncrement = () => {
+  const handleIncrement = (event: React.MouseEvent<HTMLButtonElement>) => {
     setCount(prev => prev + 1);
-   
     if (onClick) {
-      onClick(`${id}_increment`);
+      onClick('increment', event);
     }
   };
 
-  const handleDecrement = () => {
+  const handleDecrement = (event: React.MouseEvent<HTMLButtonElement>) => {
     setCount(prev => Math.max(0, prev - 1));
-   
     if (onClick) {
-      onClick(`${id}_decrement`);
+      onClick('decrement', event);
     }
   };
 
