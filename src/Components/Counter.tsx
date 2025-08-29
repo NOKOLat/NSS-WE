@@ -21,7 +21,7 @@ const Counter: React.FC<CounterProps> = ({ id, onClick }) => {
 
   const handleIncrement = () => {
     setCount(prev => prev + 1);
-    console.log('Increment button clicked'); // ←デバッグログ追加
+   
     if (onClick) {
       onClick(`${id}_increment`);
     }
@@ -29,7 +29,7 @@ const Counter: React.FC<CounterProps> = ({ id, onClick }) => {
 
   const handleDecrement = () => {
     setCount(prev => Math.max(0, prev - 1));
-    console.log('Decrement button clicked'); // ←デバッグログ追加
+   
     if (onClick) {
       onClick(`${id}_decrement`);
     }

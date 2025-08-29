@@ -6,8 +6,6 @@ import Plane from './Pages/Plane.tsx';
 import Multicopter from './Pages/Multicopter.tsx';
 import Time from './Pages/Time.tsx';
 
-// ReactのStrictModeを使用して、潜在的な問題を検出
-
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>

@@ -68,24 +68,42 @@ export default function Accordions_Multicopter() {
       setExpanded(newExpanded ? panel : false);
     };
 
-  const handleButtonClick = (id: string, parentId?: string) => {
-    let jsonData;
-    if (parentId) {
-      jsonData = {
+  const handleButtonClick = (id: string, event?: any) => {
+    try {
+      const category = 'multicopter';
+      let section = 'mainmission'; // デフォルト
+
+      // eventからAccordionSummaryのIDを取得
+      if (event && event.target) {
+        const accordionSummary = event.target.closest('.MuiAccordion-root')?.querySelector('.MuiAccordionSummary-root');
+        if (accordionSummary && accordionSummary.id) {
+          section = accordionSummary.id;
+        }
+      }
+
+      const [counterId, action] = id.split('_');
+      let value;
+      if (action === 'increment') value = 1;
+      else if (action === 'decrement') value = -1;
+      else if (action === 'checked') value = true;
+      else if (action === 'unchecked') value = false;
+      else value = 1;
+
+      const jsonData = {
         action: "update",
         category: "multicopter",
         epoch: Date.now(),
         params: {
-          [parentId]: {
-            [id]: 1
+          [section]: {
+            [counterId]: value
           }
         }
       };
-    } else {
-      jsonData = createButtonClickData(id);
+
+      saveJsonToFile(jsonData);
+    } catch (error) {
+      console.error('Error in handleButtonClick:', error);
     }
-    console.log(JSON.stringify(jsonData, null, 2));
-    saveJsonToFile(jsonData);
   };
 
   return (
@@ -98,12 +116,12 @@ export default function Accordions_Multicopter() {
           <Box>投下エリア</Box>
           <Counter 
             id="droparea" 
-            onClick={() => handleButtonClick("droparea", "mainmission")}
+            onClick={(actionId, event) => handleButtonClick(`droparea_${actionId}`, event)}
           />
           <Box>高所運搬</Box>
           <Counter 
             id="box"
-            onClick={() => handleButtonClick("box", "mainmission")}
+            onClick={(actionId, event) => handleButtonClick(`box_${actionId}`, event)}
           />
           
           <FormGroup>
@@ -113,8 +131,8 @@ export default function Accordions_Multicopter() {
       id="isCollect"
       sx={{ color: '#fff' }}
       onChange={(e) => {
-        const checkboxId = `mainmission_collect_${e.target.checked ? 'checked' : 'unchecked'}`;
-        handleButtonClick(checkboxId);
+        const checkboxId = `collect_${e.target.checked ? 'checked' : 'unchecked'}`;
+        handleButtonClick(checkboxId, e);
       }}
     />
   }
@@ -122,21 +140,23 @@ export default function Accordions_Multicopter() {
 />
         </FormGroup>
         <FormGroup>
-          <FormControlLabel control={
-            <Checkbox
-             id="isDrropedToBox" 
-             sx={{ color: '#fff',  }} 
-             onChange={(e) => {
+          <FormControlLabel
+  control={
+    <Checkbox
+      id="isDrropedToBox"
+      sx={{ color: '#fff' }}
+      onChange={(e) => {
         const checkboxId = `isDrropedToBox_${e.target.checked ? 'checked' : 'unchecked'}`;
-        handleButtonClick(checkboxId);
-      }}/>} 
-          
-          label="救援物資（大）運搬成功" />
+        handleButtonClick(checkboxId, e);
+      }}
+    />
+  }
+  label="救援物資（大）運搬成功" />
         </FormGroup>
         
           <Stopwatch 
             id="mainmission_timer"
-            onClick={(buttonId) => handleButtonClick(buttonId)}
+            onClick={(buttonId, event) => handleButtonClick(buttonId, event)}
           />
 
         </AccordionDetails>
@@ -154,7 +174,7 @@ export default function Accordions_Multicopter() {
       sx={{ color: '#fff' }}
       onChange={(e) => {
         const checkboxId = `cargo_transport_${e.target.checked ? 'checked' : 'unchecked'}`;
-        handleButtonClick(checkboxId);
+        handleButtonClick(checkboxId, e);
       }}
     />
   }
@@ -181,7 +201,7 @@ export default function Accordions_Multicopter() {
       sx={{ color: '#fff' }}
       onChange={(e) => {
         const checkboxId = `eight_handsoff_${e.target.checked ? 'checked' : 'unchecked'}`;
-        handleButtonClick(checkboxId);
+        handleButtonClick(checkboxId, e);
       }}
     />
   }
