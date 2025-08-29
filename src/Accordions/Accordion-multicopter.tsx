@@ -16,6 +16,7 @@ import MuiAccordionDetails from '@mui/material/AccordionDetails';
 import Counter from '../Components/Counter';
 import Stopwatch from '../Components/Timer'
 import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button'; // 追加
 import { createButtonClickData, saveJsonToFile } from '../Data/handleButtonClick.tsx';
 import { getCurrentNum2, getUnixTimestamp } from '../Data/time';
 
@@ -63,57 +64,388 @@ const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
 
 export default function Accordions_Multicopter() {
   const [expanded, setExpanded] = React.useState<string | false>('panel1');
-
-  const handleChange =
-    (panel: string) => (event: React.SyntheticEvent, newExpanded: boolean) => {
-      setExpanded(newExpanded ? panel : false);
-    };
+  const handleChange = (panel: string) => (event: React.SyntheticEvent, newExpanded: boolean) => {
+    setExpanded(newExpanded ? panel : false);
+  };
 
   const handleButtonClick = (id: string, event?: any) => {
-    try {
-      // 時間差取得
-      const currentNum2 = getCurrentNum2();
-      const adjustedEpoch = getUnixTimestamp() + currentNum2;
+    const category = 'multicopter';
+    const currentNum2 = getCurrentNum2();
+    const adjustedEpoch = getUnixTimestamp() + currentNum2;
 
-      const category = 'multicopter';
-      let section = 'mainmission'; // デフォルト
-
-      // eventからAccordionSummaryのIDを取得
-      if (event && event.target) {
-        const accordionSummary = event.target.closest('.MuiAccordion-root')?.querySelector('.MuiAccordionSummary-root');
-        if (accordionSummary && accordionSummary.id) {
-          section = accordionSummary.id;
-        }
-      }
-
-      const [counterId, action] = id.split('_');
-      let value;
-      if (action === 'increment') value = 1;
-      else if (action === 'decrement') value = -1;
-      else if (action === 'checked') value = true;
-      else if (action === 'unchecked') value = false;
-      else value = 1;
-
+    // isAreaTouchDown専用分岐
+    if (id.includes('isAreaTouchDown')) {
+      const value = id.includes('checked');
       const jsonData = {
         action: "update",
         category: category,
-        epoch: adjustedEpoch, // ←ここを修正
+        epoch: adjustedEpoch,
         params: {
-          [section]: {
-            [counterId]: value
+          landing: {
+            isAreaTouchDown: value
           }
         }
       };
-
       saveJsonToFile(jsonData);
-    } catch (error) {
-      console.error('Error in handleButtonClick:', error);
+      return;
     }
+
+    // isInAreaStop専用分岐
+    if (id.includes('isInAreaStop')) {
+      const value = id.includes('checked');
+      const jsonData = {
+        action: "update",
+        category: category,
+        epoch: adjustedEpoch,
+        params: {
+          landing: {
+            isInAreaStop: value
+          }
+        }
+      };
+      saveJsonToFile(jsonData);
+      return;
+    }
+
+    // repair_timer専用分岐
+    if (id.includes('repair_timer') && (id.includes('start') || id.includes('stop'))) {
+      section = 'repair';
+      const timeKey = id.includes('start') ? 'start' : 'end';
+      const adjustedTimestamp = Date.now() + currentNum2;
+      const jsonData = {
+        action: "update",
+        category: category,
+        epoch: adjustedEpoch,
+        params: {
+          repair: {
+            epoch: {
+              [timeKey]: adjustedTimestamp
+            }
+          }
+        }
+      };
+      saveJsonToFile(jsonData);
+      return;
+    }
+
+    // ホバリングのisHandsOff専用分岐
+    if (id === 'isHandsOff_checked' && section === 'hovering') {
+      const jsonData = {
+        action: "update",
+        category: category,
+        epoch: adjustedEpoch,
+        params: {
+          hovering: {
+            isHandsOff: true
+          }
+        }
+      };
+      saveJsonToFile(jsonData);
+      return;
+    }
+    if (id === 'isHandsOff_unchecked' && section === 'hovering') {
+      const jsonData = {
+        action: "update",
+        category: category,
+        epoch: adjustedEpoch,
+        params: {
+          hovering: {
+            isHandsOff: false
+          }
+        }
+      };
+      saveJsonToFile(jsonData);
+      return;
+    }
+
+    // hovering_timer専用分岐
+    if (id.includes('hovering_timer') && (id.includes('start') || id.includes('stop'))) {
+      section = 'hovering';
+      const timeKey = id.includes('start') ? 'start' : 'end';
+      const adjustedTimestamp = Date.now() + currentNum2;
+      const jsonData = {
+        action: "update",
+        category: category,
+        epoch: adjustedEpoch,
+        params: {
+          hovering: {
+            epoch: {
+              [timeKey]: adjustedTimestamp
+            }
+          }
+        }
+      };
+      saveJsonToFile(jsonData);
+      return;
+    }
+
+    // ユニークミッション成功のCheckbox専用分岐
+    if (id.includes('unique_isSuccess')) {
+      const value = id.includes('checked');
+      const jsonData = {
+        action: "update",
+        category: category,
+        epoch: adjustedEpoch,
+        params: {
+          uniqueMisson: {
+            isSuccess: value
+          }
+        }
+      };
+      saveJsonToFile(jsonData);
+      return;
+    }
+
+    // unique_timer専用分岐
+    if (id.includes('unique_timer') && (id.includes('start') || id.includes('stop'))) {
+      const timeKey = id.includes('start') ? 'start' : 'end';
+      const adjustedTimestamp = Date.now() + currentNum2;
+      const jsonData = {
+        action: "update",
+        category: category,
+        epoch: adjustedEpoch,
+        params: {
+          uniqueMisson: {
+            epoch: {
+              [timeKey]: adjustedTimestamp
+            }
+          }
+        }
+      };
+      saveJsonToFile(jsonData);
+      return;
+    }
+
+    // failsafecontrolのisHandsOff専用分岐
+    if (id.includes('isHandsOff') && section === 'failsafecontrol') {
+      const value = id.includes('checked');
+      const jsonData = {
+        action: "update",
+        category: category,
+        epoch: adjustedEpoch,
+        params: {
+          failsafecontrol: {
+            isHandsOff: value
+          }
+        }
+      };
+      saveJsonToFile(jsonData);
+      return;
+    }
+
+    // failsafe_timer専用分岐を修正
+    if (id.includes('failsafe_timer') && (id.includes('start') || id.includes('stop'))) {
+      const timeKey = id.includes('start') ? 'start' : 'end';
+      const adjustedTimestamp = Date.now() + currentNum2;
+      const jsonData = {
+        action: "update",
+        category: category,
+        epoch: adjustedEpoch,
+        params: {
+          failsafecontrol: {
+            epoch: {
+              [timeKey]: adjustedTimestamp
+            }
+          }
+        }
+      };
+      saveJsonToFile(jsonData);
+      return;
+    }
+
+    // isHandsOffのCheckbox専用分岐
+    if (id.includes('isHandsOff')) {
+      const value = id.includes('checked');
+      const jsonData = {
+        action: "update",
+        category: category,
+        epoch: adjustedEpoch,
+        params: {
+          eightTurn: {
+            isHandsOff: value
+          }
+        }
+      };
+      saveJsonToFile(jsonData);
+      return;
+    }
+
+    // isSuccessのCheckbox専用分岐
+    if (id.includes('isSuccess')) {
+      const value = id.includes('checked');
+      const jsonData = {
+        action: "update",
+        category: category,
+        epoch: adjustedEpoch,
+        params: {
+          eightTurn: {
+            isSuccess: value
+          }
+        }
+      };
+      saveJsonToFile(jsonData);
+      return;
+    }
+
+    // isLandedのCheckbox専用分岐
+    if (id.includes('isLanded')) {
+      const value = id.includes('checked');
+      const jsonData = {
+        action: "update",
+        category: category,
+        epoch: adjustedEpoch,
+        params: {
+          zaqtransportation: {
+            isLanded: value
+          }
+        }
+      };
+      saveJsonToFile(jsonData);
+      return;
+    }
+
+    // isTransportedのCheckbox専用分岐
+    if (id.includes('isTransported')) {
+      const value = id.includes('checked');
+      const jsonData = {
+        action: "update",
+        category: category,
+        epoch: adjustedEpoch,
+        params: {
+          zaqtransportation: {
+            isTransported: value
+          }
+        }
+      };
+      saveJsonToFile(jsonData);
+      return;
+    }
+
+    // Timer系の分岐を修正：idに'timer'が含まれ、かつstart/stopが含まれる場合
+    if (id.includes('timer') && (id.includes('start') || id.includes('stop'))) {
+      const action = id.includes('start') ? 'start' : 'stop';
+      const timeKey = action === 'start' ? 'start' : 'end';
+      const adjustedTimestamp = Date.now() + currentNum2;
+      const jsonData = {
+        action: "update",
+        category: category,
+        epoch: adjustedEpoch,
+        params: {
+          [section]: {
+            epoch: {
+              [timeKey]: adjustedTimestamp
+            }
+          }
+        }
+      };
+      saveJsonToFile(jsonData);
+      return;
+    }
+
+    // isCollectのCheckboxの特別な処理
+    if (id.includes('isCollect')) {
+      const value = id.includes('checked');
+      const jsonData = {
+        action: "update",
+        category: category,
+        epoch: adjustedEpoch,
+        params: {
+          mainmission: {
+            largeSupply: {
+              isCollect: value
+            }
+          }
+        }
+      };
+      saveJsonToFile(jsonData);
+      return;
+    }
+
+    // isDrropedToBoxのCheckboxの特別な処理
+    if (id.includes('isDrropedToBox')) {
+      const value = id.includes('checked');
+      const jsonData = {
+        action: "update",
+        category: category,
+        epoch: adjustedEpoch,
+        params: {
+          mainmission: {
+            largeSupply: {
+              isDrropedToBox: value
+            }
+          }
+        }
+      };
+      saveJsonToFile(jsonData);
+      return;
+    }
+
+    // 耐故障制御のハンズオフ飛行専用分岐
+    if (id.includes('failsafe_isHandsOff')) {
+      const value = id.includes('checked');
+      const jsonData = {
+        action: "update",
+        category: category,
+        epoch: adjustedEpoch,
+        params: {
+          failsafecontrol: {
+            isHandsOff: value
+          }
+        }
+      };
+      saveJsonToFile(jsonData);
+      return;
+    }
+
+    // 通常処理
+    const [counterId, action] = id.split('_');
+    let value;
+    if (action === 'increment') value = 1;
+    else if (action === 'decrement') value = -1;
+    else if (action === 'checked') value = true;
+    else if (action === 'unchecked') value = false;
+    else value = 1;
+
+    const jsonData = {
+      action: "update",
+      category: category,
+      epoch: adjustedEpoch,
+      params: {
+        [section]: {
+          [counterId]: value
+        }
+      }
+    };
+
+    saveJsonToFile(jsonData);
+  };
+
+  // スコア入力値を保持するstateを追加
+  const [scoreValue, setScoreValue] = React.useState<number | ''>('');
+
+  // 完了ボタンのクリック処理
+  const handleScoreComplete = () => {
+    const category = 'multicopter';
+    const currentNum2 = getCurrentNum2();
+    const adjustedEpoch = getUnixTimestamp() + currentNum2;
+    const value = Number(scoreValue);
+
+    const jsonData = {
+      action: "update",
+      category: category,
+      epoch: adjustedEpoch,
+      params: {
+        uniqueMisson: {
+          score: value
+        }
+      }
+    };
+    saveJsonToFile(jsonData);
   };
 
   return (
     <div>
-      <Accordion expanded={expanded === 'panel1'} onChange={handleChange('panel1')}>
+      <Accordion id="mainmission" expanded={expanded === 'panel1'} onChange={handleChange('panel1')}>
         <AccordionSummary aria-controls="panel1d-content" id="mainmission">
           <Typography component="span">メインミッション</Typography>
         </AccordionSummary>
@@ -136,7 +468,7 @@ export default function Accordions_Multicopter() {
       id="isCollect"
       sx={{ color: '#fff' }}
       onChange={(e) => {
-        const checkboxId = `collect_${e.target.checked ? 'checked' : 'unchecked'}`;
+        const checkboxId = `isCollect_${e.target.checked ? 'checked' : 'unchecked'}`;
         handleButtonClick(checkboxId, e);
       }}
     />
@@ -161,7 +493,7 @@ export default function Accordions_Multicopter() {
         
           <Stopwatch 
             id="mainmission_timer"
-            onClick={(buttonId, event) => handleButtonClick(buttonId, event)}
+            onClick={(actionId, event) => handleButtonClick(`mainmission_timer_${actionId}`, event)}
           />
 
         </AccordionDetails>
@@ -178,7 +510,7 @@ export default function Accordions_Multicopter() {
       id="isTransported"
       sx={{ color: '#fff' }}
       onChange={(e) => {
-        const checkboxId = `cargo_transport_${e.target.checked ? 'checked' : 'unchecked'}`;
+        const checkboxId = `isTransported_${e.target.checked ? 'checked' : 'unchecked'}`;
         handleButtonClick(checkboxId, e);
       }}
     />
@@ -188,7 +520,11 @@ export default function Accordions_Multicopter() {
          </FormGroup>
 
          <FormGroup>
-         <FormControlLabel  control={<Checkbox id = "isLanded" sx={{ color: '#fff',  }}/>} label="着陸" />
+         <FormControlLabel  control={<Checkbox id= "isLanded" sx={{ color: '#fff' }} onChange={(e) => {
+    const checkboxId = `isLanded_${e.target.checked ? 'checked' : 'unchecked'}`;
+    handleButtonClick(checkboxId, e);
+  }} />}
+          label="着陸" />
           </FormGroup>
 
         </AccordionDetails>
@@ -205,7 +541,7 @@ export default function Accordions_Multicopter() {
       id="isHandsOff"
       sx={{ color: '#fff' }}
       onChange={(e) => {
-        const checkboxId = `eight_handsoff_${e.target.checked ? 'checked' : 'unchecked'}`;
+        const checkboxId = `isHandsOff_${e.target.checked ? 'checked' : 'unchecked'}`;
         handleButtonClick(checkboxId, e);
       }}
     />
@@ -215,22 +551,40 @@ export default function Accordions_Multicopter() {
          </FormGroup>
 
          <FormGroup>
-         <FormControlLabel  control={<Checkbox id= "isSuccess" sx={{ color: '#fff',  }}/>} label="成功" />
+         <FormControlLabel
+  control={
+    <Checkbox
+      id="isSuccess"
+      sx={{ color: '#fff' }}
+      onChange={(e) => {
+        const checkboxId = `isSuccess_${e.target.checked ? 'checked' : 'unchecked'}`;
+        handleButtonClick(checkboxId, e);
+      }}
+    />
+  }
+  label="成功" />
           </FormGroup>
         </AccordionDetails>
         
       </Accordion>
-      <Accordion expanded={expanded === 'panel4'} onChange={handleChange('panel4')}>
-        <AccordionSummary aria-controls="panel4d-content" id="panel4d-header">
+      <Accordion id="failsafecontrol" expanded={expanded === 'panel4'} onChange={handleChange('panel4')}>
+        <AccordionSummary aria-controls="panel4d-content" id="failsafecontrol">
           <Typography component="span">耐故障制御</Typography>
         </AccordionSummary>
         <AccordionDetails>
         <Stopwatch 
           id="failsafe_timer"
-          onClick={(buttonId) => handleButtonClick(buttonId)}
+          onClick={(actionId, event) => handleButtonClick(`failsafe_timer_${actionId}`, event)}
         />
         <FormGroup>
-         <FormControlLabel  control={<Checkbox id= "isHandsOff" sx={{ color: '#fff',  }}/>} label="ハンズオフ飛行" />
+         <FormControlLabel  control={<Checkbox 
+         id= "failsafe_isHandsOff"
+          sx={{ color: '#fff',  }}
+          onChange={(e) => {
+        const checkboxId = `failsafe_isHandsOff_${e.target.checked ? 'checked' : 'unchecked'}`;
+        handleButtonClick(checkboxId, e);
+      }} />}
+       label="ハンズオフ飛行" />
           </FormGroup>
         </AccordionDetails>
         
@@ -240,58 +594,77 @@ export default function Accordions_Multicopter() {
           <Typography component="span">ユニークミッション</Typography>
         </AccordionSummary>
         <AccordionDetails>
-        <Stopwatch 
-          id="unique_timer"
-          onClick={(buttonId) => handleButtonClick(buttonId)}
-        />
-        
-        <FormGroup>
-         <FormControlLabel  control={<Checkbox id= "isSuccess" sx={{ color: '#fff',  }}/>} label="成功" />
+          <Stopwatch 
+            id="unique_timer"
+            onClick={(actionId, event) => handleButtonClick(`unique_timer_${actionId}`, event)}
+          />
+          <FormGroup>
+            <FormControlLabel  control={<Checkbox
+              id="unique_isSuccess"
+              sx={{ color: '#fff' }}
+              onChange={(e) => {
+                const checkboxId = `unique_isSuccess_${e.target.checked ? 'checked' : 'unchecked'}`;
+                handleButtonClick(checkboxId, e);
+              }}
+            />} 
+            label="成功" />
           </FormGroup>
-          <Box id ="score" sx={{ mt: 2 }}>
+          <Box id="score" sx={{ mt: 2 }}>
             <Typography component="span" sx={{ mr: 1 }}>
               数値を入力してください:
             </Typography>
-          <TextField 
-            type="number"
-            variant="outlined"
-            size="small"
-            sx={{
-              '& .MuiOutlinedInput-root': {
-                '& fieldset': {
-                  borderColor: '#1976d2', // 枠線の色
+            <TextField 
+              id="score"
+              type="number"
+              variant="outlined"
+              size="small"
+              value={scoreValue}
+              onChange={(e) => setScoreValue(e.target.value === '' ? '' : Number(e.target.value))}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  '& fieldset': { borderColor: '#1976d2' },
+                  '&:hover fieldset': { borderColor: '#1565c0' },
+                  '&.Mui-focused fieldset': { borderColor: '#004ba0' },
                 },
-                '&:hover fieldset': {
-                  borderColor: '#1565c0', // ホバー時の枠線の色
-                },
-                '&.Mui-focused fieldset': {
-                  borderColor: '#004ba0', // フォーカス時の枠線の色
-                },
-              },
-              '& .MuiInputBase-input': {
-                color: '#fff', // テキストの色
-              },
-              '& .MuiInputLabel-root': {
-                color: '#fff', // ラベルの色
-              },
-            }}
-            onChange={(e) => console.log(e.target.value)} // 必要に応じて値を処理
-          />
-         </Box>
+                '& .MuiInputBase-input': { color: '#fff' },
+                '& .MuiInputLabel-root': { color: '#fff' },
+              }}
+            />
+            <Button
+              variant="contained"
+              color="primary"
+              sx={{ ml: 2 }}
+              onClick={handleScoreComplete}
+              disabled={scoreValue === ''} // 空欄の時は押せない
+            >
+              完了
+            </Button>
+          </Box>
         </AccordionDetails>
-        
       </Accordion>
       <Accordion expanded={expanded === 'panel6'} onChange={handleChange('panel6')}>
-        <AccordionSummary aria-controls="panel6d-content" id="panel6d-header">
+        <AccordionSummary aria-controls="panel6d-content" id="hovering">
           <Typography component="span">ホバリング</Typography>
         </AccordionSummary>
         <AccordionDetails>
         <Stopwatch 
           id="hovering_timer"
-          onClick={(buttonId) => handleButtonClick(buttonId)}
+          onClick={(actionId, event) => handleButtonClick(`hovering_timer_${actionId}`, event)}
         />
         <FormGroup>
-         <FormControlLabel  control={<Checkbox id="isHandsOff" sx={{ color: '#fff',  }}/>} label="ハンズオフ飛行" />
+         <FormControlLabel
+  control={
+    <Checkbox
+      id="isHandsOff"
+      sx={{ color: '#fff' }}
+      onChange={(e) => {
+        const checkboxId = `isHandsOff_${e.target.checked ? 'checked' : 'unchecked'}`;
+        handleButtonClick(checkboxId, e);
+      }}
+    />
+  }
+  label="ハンズオフ飛行"
+/>
           </FormGroup>
          
          </AccordionDetails>
@@ -306,7 +679,7 @@ export default function Accordions_Multicopter() {
         <AccordionDetails>
         <Stopwatch 
           id="repair_timer"
-          onClick={(buttonId) => handleButtonClick(buttonId)}
+          onClick={(actionId, event) => handleButtonClick(`repair_timer_${actionId}`, event)}
         />
         </AccordionDetails>
         
@@ -317,12 +690,34 @@ export default function Accordions_Multicopter() {
         </AccordionSummary>
         <AccordionDetails>
         <FormGroup>
-         <FormControlLabel  control={<Checkbox id= "isAreaTouchDown" sx={{ color: '#fff',  }}/>} label="エリア内接地" />
-         <FormControlLabel  control={<Checkbox id= "isInAreaStop"  sx={{ color: '#fff',  }}/>} label="滑走路内着陸" />
+         <FormControlLabel
+  control={
+    <Checkbox
+      id="isAreaTouchDown"
+      sx={{ color: '#fff' }}
+      onChange={(e) => {
+        const checkboxId = `isAreaTouchDown_${e.target.checked ? 'checked' : 'unchecked'}`;
+        handleButtonClick(checkboxId, e);
+      }}
+    />
+  }
+  label="エリア内接地"
+ />
+         <FormControlLabel
+  control={
+    <Checkbox
+      id="isInAreaStop"
+      sx={{ color: '#fff' }}
+      onChange={(e) => {
+        const checkboxId = `isInAreaStop_${e.target.checked ? 'checked' : 'unchecked'}`;
+        handleButtonClick(checkboxId, e);
+      }}
+    />
+  }
+  label="エリア内停止"
+ />
           </FormGroup>
         </AccordionDetails>
-        
-     
         
       </Accordion>
 
