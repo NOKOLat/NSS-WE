@@ -17,6 +17,7 @@ import Counter from '../Components/Counter';
 import Stopwatch from '../Components/Timer'
 import TextField from '@mui/material/TextField';
 import { createButtonClickData, saveJsonToFile } from '../Data/handleButtonClick.tsx';
+import { getCurrentNum2, getUnixTimestamp } from '../Data/time';
 
 const Accordion = styled((props: AccordionProps) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
@@ -70,6 +71,10 @@ export default function Accordions_Multicopter() {
 
   const handleButtonClick = (id: string, event?: any) => {
     try {
+      // 時間差取得
+      const currentNum2 = getCurrentNum2();
+      const adjustedEpoch = getUnixTimestamp() + currentNum2;
+
       const category = 'multicopter';
       let section = 'mainmission'; // デフォルト
 
@@ -91,8 +96,8 @@ export default function Accordions_Multicopter() {
 
       const jsonData = {
         action: "update",
-        category: "multicopter",
-        epoch: Date.now(),
+        category: category,
+        epoch: adjustedEpoch, // ←ここを修正
         params: {
           [section]: {
             [counterId]: value

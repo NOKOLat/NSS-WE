@@ -13,6 +13,7 @@ import MuiAccordionDetails from '@mui/material/AccordionDetails';
 import Counter from '../Components/Counter.tsx'
 import Stopwatch from '../Components/Timer.tsx'
 import { createButtonClickData, saveJsonToFile } from '../Data/handleButtonClick.tsx';
+import { getCurrentNum2, getUnixTimestamp } from '../Data/time';
 
 const Accordion = styled((props: AccordionProps) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
@@ -54,41 +55,52 @@ const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
 }));
 
 const handleButtonClick = (id: string, event?: any) => {
-  try {
-    const category = 'plane';
-    let section = 'mainmission';
+  const category = 'plane';
+  let section = 'mainmission';
+  const [counterId, action] = id.split('_');
+  const currentNum2 = getCurrentNum2();
+  const adjustedEpoch = getUnixTimestamp() + currentNum2;
 
-    // eventからAccordionSummaryのIDを取得
-    if (event && event.target) {
-      const accordionSummary = event.target.closest('.MuiAccordion-root')?.querySelector('.MuiAccordionSummary-root');
-      if (accordionSummary && accordionSummary.id) {
-        section = accordionSummary.id;
-      }
-    }
-
-    const [counterId, action] = id.split('_');
-    let value;
-    if (action === 'increment') value = 1;
-    else if (action === 'decrement') value = -1;
-    else if (action === 'checked') value = true;
-    else if (action === 'unchecked') value = false;
-    else value = 1;
-
+  // mainMissionTimerのstart/stopのみ特別なJSON
+  if (counterId === "mainMissionTimer" && (action === "start" || action === "stop")) {
+    const timeKey = action === "start" ? "start" : "end";
+    const adjustedTimestamp = Date.now() + currentNum2;
     const jsonData = {
       action: "update",
       category: category,
-      epoch: Date.now(),
+      epoch: adjustedEpoch,
       params: {
-        [section]: {
-          [counterId]: value
+        mainmission: {
+          epoch: {
+            [timeKey]: adjustedTimestamp
+          }
         }
       }
     };
-
     saveJsonToFile(jsonData);
-  } catch (error) {
-    console.error('Error in handleButtonClick:', error);
+    return;
   }
+
+  // 通常の処理
+  let value;
+  if (action === 'increment') value = 1;
+  else if (action === 'decrement') value = -1;
+  else if (action === 'checked') value = true;
+  else if (action === 'unchecked') value = false;
+  else value = 1;
+
+  const jsonData = {
+    action: "update",
+    category: category,
+    epoch: adjustedEpoch,
+    params: {
+      [section]: {
+        [counterId]: value
+      }
+    }
+  };
+
+  saveJsonToFile(jsonData);
 };
 
 export default function Accordions_Plane() {
@@ -137,7 +149,7 @@ export default function Accordions_Plane() {
           />
           <Stopwatch 
             id="mainMissionTimer" 
-            onClick={(actionId, event) => handleButtonClick(`timer_${actionId}`, event)} 
+            onClick={(actionId, event) => handleButtonClick(`mainMissionTimer_${actionId}`, event)} 
           />
         </AccordionDetails>
       </Accordion>
