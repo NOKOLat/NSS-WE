@@ -397,7 +397,7 @@ export default function Accordions_Multicopter() {
       return;
     }
 
-    // 通常処理
+    // 最後に通常処理
     const [counterId, action] = id.split('_');
     let value;
     if (action === 'increment') value = 1;
@@ -405,6 +405,16 @@ export default function Accordions_Multicopter() {
     else if (action === 'checked') value = true;
     else if (action === 'unchecked') value = false;
     else value = 1;
+
+    // sectionの取得
+    let section = 'mainmission';
+    if (event && event.target) {
+      const accordionDetails = event.target.closest('.MuiAccordionDetails-root');
+      const accordion = accordionDetails?.closest('.MuiAccordion-root');
+      if (accordion && accordion.id) {
+        section = accordion.id;
+      }
+    }
 
     const jsonData = {
       action: "update",
