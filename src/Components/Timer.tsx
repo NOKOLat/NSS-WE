@@ -65,7 +65,7 @@ function Stopwatch({ id, onClick }: StopwatchProps) {
   
 
   return (
-      <Box sx={{ p: 1 }}>
+      <Box sx={{ p: 1 }} data-timer-id={id}>
         <Stack>
           <Box>計測時間</Box>
           <Box>{minutes}:{seconds}:{milliseconds}</Box>
