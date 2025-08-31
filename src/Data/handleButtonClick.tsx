@@ -36,7 +36,7 @@ const handleButtonClick = (id: string, num2: number, category: string) => {
 };
 
 
-
+//JSONファイルを送信する関数
 export const sendJsonToServer = (jsonData: any, sendJsonMessage?: (data: any) => void) => {
   if (sendJsonMessage) {
     sendJsonMessage(jsonData);

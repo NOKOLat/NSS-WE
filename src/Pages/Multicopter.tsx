@@ -61,11 +61,3 @@ export default function Multicopter(props: Props) {
     </React.Fragment>
   );
 }
-
-
-
-
-
-
-
-

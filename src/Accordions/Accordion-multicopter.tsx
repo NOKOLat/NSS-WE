@@ -8,10 +8,7 @@ import Checkbox from '@mui/material/Checkbox';
 import { styled } from '@mui/material/styles';
 import ArrowForwardIosSharpIcon from '@mui/icons-material/ArrowForwardIosSharp';
 import MuiAccordion, { AccordionProps } from '@mui/material/Accordion';
-import MuiAccordionSummary, {
-  AccordionSummaryProps,
-  accordionSummaryClasses,
-} from '@mui/material/AccordionSummary';
+import MuiAccordionSummary, {AccordionSummaryProps, accordionSummaryClasses} from '@mui/material/AccordionSummary';
 import MuiAccordionDetails from '@mui/material/AccordionDetails';
 import Counter from '../Components/Counter';
 import Stopwatch from '../Components/Timer'

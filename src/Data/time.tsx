@@ -98,5 +98,3 @@ export function getUnixResult(num2: number): number {
 export function getUnixTimestamp(): number {
   return Math.floor(Date.now());
 }
-
-
