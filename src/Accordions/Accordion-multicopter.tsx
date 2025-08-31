@@ -73,385 +73,72 @@ export default function Accordions_Multicopter({ sendJsonMessage }: Props) {
   };
 
   const handleButtonClick = (id: string, event?: any) => {
-    const category = 'multicopter';
     let section = 'mainmission';
-
-    // AccordionDetailsから親AccordionのIDを取得（最初に一度だけ）
-    if (event && event.target) {
-      const accordionDetails = event.target.closest('.MuiAccordionDetails-root');
-      const accordion = accordionDetails?.closest('.MuiAccordion-root');
-      if (accordion && accordion.id) {
-        section = accordion.id;
-      }
+    
+    // Section取得
+    if (event?.target) {
+      const accordion = event.target.closest('.MuiAccordion-root');
+      if (accordion?.id) section = accordion.id;
     }
 
     const currentNum2 = getCurrentNum2();
-    const adjustedEpoch = getUnixTimestamp() + currentNum2;
+    const value = id.includes('checked');
 
-    // isAreaTouchDown専用分岐
-    if (id.includes('isAreaTouchDown')) {
-      const value = id.includes('checked');
-      const jsonData = {
-        action: "update",
-        category: category,
-        epoch: adjustedEpoch,
-        params: {
-          landing: {
-            isAreaTouchDown: value
-          }
-        }
-      };
-      saveJsonToFile(jsonData);
-      sendJsonMessage(jsonData);
-      return;
-    }
-
-    // isInAreaStop専用分岐
-    if (id.includes('isInAreaStop')) {
-      const value = id.includes('checked');
-      const jsonData = {
-        action: "update",
-        category: category,
-        epoch: adjustedEpoch,
-        params: {
-          landing: {
-            isInAreaStop: value
-          }
-        }
-      };
-      saveJsonToFile(jsonData);
-      sendJsonMessage(jsonData);
-      return;
-    }
-
-    // repair_timer専用分岐
-    if (id.includes('repair_timer') && (id.includes('start') || id.includes('stop'))) {
-      section = 'repair';
-      const timeKey = id.includes('start') ? 'start' : 'end';
-      const adjustedTimestamp = Date.now() + currentNum2;
-      const jsonData = {
-        action: "update",
-        category: category,
-        epoch: adjustedEpoch,
-        params: {
-          repair: {
-            epoch: {
-              [timeKey]: adjustedTimestamp
-            }
-          }
-        }
-      };
-      saveJsonToFile(jsonData);
-      sendJsonMessage(jsonData);
-      return;
-    }
-
-    // ホバリングのisHandsOff専用分岐
-    if (id === 'isHandsOff_checked' && section === 'hovering') {
-      const jsonData = {
-        action: "update",
-        category: category,
-        epoch: adjustedEpoch,
-        params: {
-          hovering: {
-            isHandsOff: true
-          }
-        }
-      };
-      saveJsonToFile(jsonData);
-      sendJsonMessage(jsonData);
-      return;
-    }
-    if (id === 'isHandsOff_unchecked' && section === 'hovering') {
-      const jsonData = {
-        action: "update",
-        category: category,
-        epoch: adjustedEpoch,
-        params: {
-          hovering: {
-            isHandsOff: false
-          }
-        }
-      };
-      saveJsonToFile(jsonData);
-      sendJsonMessage(jsonData);
-      return;
-    }
-
-    // hovering_timer専用分岐
-    if (id.includes('hovering_timer') && (id.includes('start') || id.includes('stop'))) {
-      section = 'hovering';
-      const timeKey = id.includes('start') ? 'start' : 'end';
-      const adjustedTimestamp = Date.now() + currentNum2;
-      const jsonData = {
-        action: "update",
-        category: category,
-        epoch: adjustedEpoch,
-        params: {
-          hovering: {
-            epoch: {
-              [timeKey]: adjustedTimestamp
-            }
-          }
-        }
-      };
-      saveJsonToFile(jsonData);
-      sendJsonMessage(jsonData);
-      return;
-    }
-
-    // ユニークミッション成功のCheckbox専用分岐
-    if (id.includes('unique_isSuccess')) {
-      const value = id.includes('checked');
-      const jsonData = {
-        action: "update",
-        category: category,
-        epoch: adjustedEpoch,
-        params: {
-          uniqueMisson: {
-            isSuccess: value
-          }
-        }
-      };
-      saveJsonToFile(jsonData);
-      sendJsonMessage(jsonData);
-      return;
-    }
-
-    // unique_timer専用分岐
-    if (id.includes('unique_timer') && (id.includes('start') || id.includes('stop'))) {
-      const timeKey = id.includes('start') ? 'start' : 'end';
-      const adjustedTimestamp = Date.now() + currentNum2;
-      const jsonData = {
-        action: "update",
-        category: category,
-        epoch: adjustedEpoch,
-        params: {
-          uniqueMisson: {
-            epoch: {
-              [timeKey]: adjustedTimestamp
-            }
-          }
-        }
-      };
-      saveJsonToFile(jsonData);
-      sendJsonMessage(jsonData);
-      return;
-    }
-
-    // failsafecontrolのisHandsOff専用分岐
-    if (id.includes('isHandsOff') && section === 'failsafecontrol') {
-      const value = id.includes('checked');
-      const jsonData = {
-        action: "update",
-        category: category,
-        epoch: adjustedEpoch,
-        params: {
-          failsafecontrol: {
-            isHandsOff: value
-          }
-        }
-      };
-      saveJsonToFile(jsonData);
-      sendJsonMessage(jsonData);
-      return;
-    }
-
-    // failsafe_timer専用分岐を修正
-    if (id.includes('failsafe_timer') && (id.includes('start') || id.includes('stop'))) {
-      const timeKey = id.includes('start') ? 'start' : 'end';
-      const adjustedTimestamp = Date.now() + currentNum2;
-      const jsonData = {
-        action: "update",
-        category: category,
-        epoch: adjustedEpoch,
-        params: {
-          failsafecontrol: {
-            epoch: {
-              [timeKey]: adjustedTimestamp
-            }
-          }
-        }
-      };
-      saveJsonToFile(jsonData);
-      sendJsonMessage(jsonData);
-      return;
-    }
-
-    // isHandsOffのCheckbox専用分岐
-    if (id.includes('isHandsOff')) {
-      const value = id.includes('checked');
-      const jsonData = {
-        action: "update",
-        category: category,
-        epoch: adjustedEpoch,
-        params: {
-          eightTurn: {
-            isHandsOff: value
-          }
-        }
-      };
-      saveJsonToFile(jsonData);
-      sendJsonMessage(jsonData);
-      return;
-    }
-
-    // isSuccessのCheckbox専用分岐
-    if (id.includes('isSuccess')) {
-      const value = id.includes('checked');
-      const jsonData = {
-        action: "update",
-        category: category,
-        epoch: adjustedEpoch,
-        params: {
-          eightTurn: {
-            isSuccess: value
-          }
-        }
-      };
-      saveJsonToFile(jsonData);
-      sendJsonMessage(jsonData);
-      return;
-    }
-
-    // isLandedのCheckbox専用分岐
-    if (id.includes('isLanded')) {
-      const value = id.includes('checked');
-      const jsonData = {
-        action: "update",
-        category: category,
-        epoch: adjustedEpoch,
-        params: {
-          zaqtransportation: {
-            isLanded: value
-          }
-        }
-      };
-      saveJsonToFile(jsonData);
-      sendJsonMessage(jsonData);
-      return;
-    }
-
-    // isTransportedのCheckbox専用分岐
-    if (id.includes('isTransported')) {
-      const value = id.includes('checked');
-      const jsonData = {
-        action: "update",
-        category: category,
-        epoch: adjustedEpoch,
-        params: {
-          zaqtransportation: {
-            isTransported: value
-          }
-        }
-      };
-      saveJsonToFile(jsonData);
-      sendJsonMessage(jsonData);
-      return;
-    }
-
-    // Timer系の分岐を修正：idに'timer'が含まれ、かつstart/stopが含まれる場合
-    if (id.includes('timer') && (id.includes('start') || id.includes('stop'))) {
-      const action = id.includes('start') ? 'start' : 'stop';
-      const timeKey = action === 'start' ? 'start' : 'end';
-      const adjustedTimestamp = Date.now() + currentNum2;
-      const jsonData = {
-        action: "update",
-        category: category,
-        epoch: adjustedEpoch,
-        params: {
-          [section]: {
-            epoch: {
-              [timeKey]: adjustedTimestamp
-            }
-          }
-        }
-      };
-      saveJsonToFile(jsonData);
-      sendJsonMessage(jsonData);
-      return;
-    }
-
-    // isCollectのCheckboxの特別な処理
-    if (id.includes('isCollect')) {
-      const value = id.includes('checked');
-      const jsonData = {
-        action: "update",
-        category: category,
-        epoch: adjustedEpoch,
-        params: {
-          mainmission: {
-            largeSupply: {
-              isCollect: value
-            }
-          }
-        }
-      };
-      saveJsonToFile(jsonData);
-      sendJsonMessage(jsonData);
-      return;
-    }
-
-    // isDrropedToBoxのCheckboxの特別な処理
-    if (id.includes('isDrropedToBox')) {
-      const value = id.includes('checked');
-      const jsonData = {
-        action: "update",
-        category: category,
-        epoch: adjustedEpoch,
-        params: {
-          mainmission: {
-            largeSupply: {
-              isDrropedToBox: value
-            }
-          }
-        }
-      };
-      saveJsonToFile(jsonData);
-      sendJsonMessage(jsonData);
-      return;
-    }
-
-    // 耐故障制御のハンズオフ飛行専用分岐
-    if (id.includes('failsafe_isHandsOff')) {
-      const value = id.includes('checked');
-      const jsonData = {
-        action: "update",
-        category: category,
-        epoch: adjustedEpoch,
-        params: {
-          failsafecontrol: {
-            isHandsOff: value
-          }
-        }
-      };
-      saveJsonToFile(jsonData);
-      sendJsonMessage(jsonData);
-      return;
-    }
-
-    // --- 最後に通常処理 ---
-    const [counterId, action] = id.split('_');
-    let value;
-    if (action === 'increment') value = 1;
-    else if (action === 'decrement') value = -1;
-    else if (action === 'checked') value = true;
-    else if (action === 'unchecked') value = false;
-    else value = 1;
-
-    const jsonData = {
-      action: "update",
-      category: category,
-      epoch: adjustedEpoch,
-      params: {
-        [section]: {
-          [counterId]: value
-        }
-      }
+    // 特殊ケースのマッピング
+    const specialCases = {
+      'isAreaTouchDown': () => sendData({ landing: { isAreaTouchDown: value } }),
+      'isInAreaStop': () => sendData({ landing: { isInAreaStop: value } }),
+      'unique_isSuccess': () => sendData({ uniqueMisson: { isSuccess: value } }),
+      'isCollect': () => sendData({ mainmission: { largeSupply: { isCollect: value } } }),
+      'isDrropedToBox': () => sendData({ mainmission: { largeSupply: { isDrropedToBox: value } } }),
+      'isTransported': () => sendData({ zaqtransportation: { isTransported: value } }),
+      'isLanded': () => sendData({ zaqtransportation: { isLanded: value } }),
+      'failsafe_isHandsOff': () => sendData({ failsafecontrol: { isHandsOff: value } }),
     };
 
-    saveJsonToFile(jsonData);
-    sendJsonMessage(jsonData);
+    // 特殊ケース処理
+    for (const [key, handler] of Object.entries(specialCases)) {
+      if (id.includes(key)) return handler();
+    }
+
+    // Timer処理
+    if (id.includes('timer') && (id.includes('start') || id.includes('stop'))) {
+      const timeKey = id.includes('start') ? 'start' : 'end';
+      const adjustedTimestamp = Date.now() + currentNum2;
+      
+      const timerSections = {
+        repair_timer: 'repair',
+        hovering_timer: 'hovering',
+        unique_timer: 'uniqueMisson',
+        failsafe_timer: 'failsafecontrol'
+      };
+      
+      const timerSection = Object.keys(timerSections).find(key => id.includes(key));
+      const targetSection = timerSection ? timerSections[timerSection] : section;
+      
+      return sendData({ [targetSection]: { epoch: { [timeKey]: adjustedTimestamp } } });
+    }
+
+    // isHandsOff/isSuccess処理（section依存）
+    if (id.includes('isHandsOff')) {
+      const targetSection = section === 'hovering' ? 'hovering' : 'eightTurn';
+      return sendData({ [targetSection]: { isHandsOff: value } });
+    }
+    
+    if (id.includes('isSuccess')) {
+      return sendData({ eightTurn: { isSuccess: value } });
+    }
+
+    // 通常処理
+    const [counterId, action] = id.split('_');
+    let actionValue;
+    if (action === 'increment') actionValue = 1;
+    else if (action === 'decrement') actionValue = -1;
+    else if (action === 'checked') actionValue = true;
+    else if (action === 'unchecked') actionValue = false;
+    else actionValue = 1;
+
+    sendData({ [section]: { [counterId]: actionValue } });
   };
 
   // スコア入力値を保持するstateを追加
@@ -477,6 +164,23 @@ export default function Accordions_Multicopter({ sendJsonMessage }: Props) {
     saveJsonToFile(jsonData);
     sendJsonMessage(jsonData);
   };
+
+  // 共通送信関数を追加
+const sendData = (params: any) => {
+  const category = 'multicopter';
+  const currentNum2 = getCurrentNum2();
+  const adjustedEpoch = getUnixTimestamp() + currentNum2;
+  
+  const jsonData = {
+    action: "update",
+    category,
+    epoch: adjustedEpoch,
+    params
+  };
+  
+  saveJsonToFile(jsonData);
+  sendJsonMessage(jsonData);
+};
 
   return (
     <div>
