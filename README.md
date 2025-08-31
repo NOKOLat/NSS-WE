@@ -22,13 +22,14 @@ npm install
 npm run dev
 
 ## ディレクトリ構成例
-NSS-WE/ 
-├── src/ 
-│ ├── Pages/ 
-│ ├── Accordions/ 
-│ ├── Components/
-│ ├── Data/ 
-│ └── App.tsx 
-├── public/ 
-├── package.json 
-└── README.md
+NSS-WE/　　
+
+├── src/  
+│ ├── Pages/  
+│ ├── Accordions/  
+│ ├── Components/  
+│ ├── Data/  
+│ └── App.tsx  
+├── public/  
+├── package.json  
+└── README.md　
