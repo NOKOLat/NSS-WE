@@ -64,55 +64,34 @@ export default function Accordions_Plane({ sendJsonMessage }: Props) {
     (panel: string) => (event: React.SyntheticEvent, newExpanded: boolean) => {
       setExpanded(newExpanded ? panel : false);
     };
-
-  // ここでhandleButtonClickを定義
   const handleButtonClick = (id: string, event?: any) => {
-    const category = 'plane';
     let section = 'mainmission';
+    
+    // Section取得
+    if (event?.target) {
+      const accordion = event.target.closest('.MuiAccordion-root');
+      if (accordion?.id) section = accordion.id;
+    }
 
     const [counterId, action] = id.split('_');
-
-    if (counterId === 'mainMissionTimer') {
-      section = 'mainmission';
-    } else if (counterId === 'glidingTimer') {
-      section = 'gliding';
-    } else if (counterId === 'repairTimer') {
-      section = 'repair';
-    } else if (event && event.target) {
-      const accordionDetails = event.target.closest('.MuiAccordionDetails-root');
-      const accordion = accordionDetails?.closest('.MuiAccordion-root');
-      if (accordion && accordion.id) {
-        section = accordion.id;
-      }
-    }
-
     const currentNum2 = getCurrentNum2();
-    const adjustedEpoch = getUnixTimestamp() + currentNum2;
 
-    if (
-      counterId.toLowerCase().includes('timer') &&
-      (action === 'start' || action === 'stop')
-    ) {
+    // Timer処理
+    if (counterId.toLowerCase().includes('timer') && (action === 'start' || action === 'stop')) {
       const timeKey = action === 'start' ? 'start' : 'end';
       const adjustedTimestamp = Date.now() + currentNum2;
-      const jsonData = {
-        action: "update",
-        category: category,
-        epoch: adjustedEpoch,
-        params: {
-          [section]: {
-            epoch: {
-              [timeKey]: adjustedTimestamp
-            }
-          }
-        }
+      
+      const timerSections = {
+        mainMissionTimer: 'mainmission',
+        glidingTimer: 'gliding',
+        repairTimer: 'repair'
       };
-      saveJsonToFile(jsonData);
-      sendJsonToServer(jsonData, sendJsonMessage);
-      return;
+      
+      const targetSection = timerSections[counterId] || section;
+      return sendData({ [targetSection]: { epoch: { [timeKey]: adjustedTimestamp } } });
     }
 
-    // 通常の処理
+    // 通常処理
     let value;
     if (action === 'increment') value = 1;
     else if (action === 'decrement') value = -1;
@@ -120,410 +99,191 @@ export default function Accordions_Plane({ sendJsonMessage }: Props) {
     else if (action === 'unchecked') value = false;
     else value = 1;
 
+    sendData({ [section]: { [counterId]: value } });
+  };
+
+  // 共通送信関数
+  const sendData = (params: any) => {
+    const category = 'plane';
+    const currentNum2 = getCurrentNum2();
+    const adjustedEpoch = getUnixTimestamp() + currentNum2;
+    
     const jsonData = {
       action: "update",
-      category: category,
+      category,
       epoch: adjustedEpoch,
-      params: {
-        [section]: {
-          [counterId]: value
-        }
-      }
+      params
     };
-
+    
     saveJsonToFile(jsonData);
     sendJsonToServer(jsonData, sendJsonMessage);
   };
 
+  // Checkbox
+  const createCheckbox = (id: string, label: string) => (
+    <FormControlLabel
+      control={
+        <Checkbox
+          id={id}
+          onChange={(e) => {
+            const checkboxId = `${id}_${e.target.checked ? 'checked' : 'unchecked'}`;
+            handleButtonClick(checkboxId, e);
+          }}
+        />
+      }
+      label={label}
+    />
+  );
+
+  // Counter
+  const createCounter = (id: string, label: string) => (
+    <>
+      <Box>{label}</Box>
+      <Counter 
+        id={id} 
+        onClick={(actionId, event) => handleButtonClick(`${id}_${actionId}`, event)}
+      />
+    </>
+  );
+
+  // Accordion
+  const createAccordion = (id: string, panel: string, title: string, children: React.ReactNode) => (
+    <Accordion id={id} expanded={expanded === panel} onChange={handleChange(panel)}>
+      <AccordionSummary aria-controls={`${panel}d-content`} id={id}>
+        <Typography component="span">{title}</Typography>
+      </AccordionSummary>
+      <AccordionDetails>
+        {children}
+      </AccordionDetails>
+    </Accordion>
+  );
+
   return (
     <div>
-      {/* --- panel1 --- */}
-      <Accordion id="mainmission" expanded={expanded === 'panel1'} onChange={handleChange('panel1')}>
-        <AccordionSummary aria-controls="panel1d-content" id="mainmission">
-          <Typography component="span">メインミッション</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
+      {createAccordion("mainmission", "panel1", "メインミッション", (
+        <>
           <FormGroup>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  id="success"
-                  onChange={(e) => {
-                    const checkboxId = `success_${e.target.checked ? 'checked' : 'unchecked'}`;
-                    handleButtonClick(checkboxId, e);
-                  }}
-                />
-              }
-              label="メインミッション成功"
-            />
+            {createCheckbox("success", "メインミッション成功")}
           </FormGroup>
-          <Box>エリア１</Box>
-          <Counter 
-            id="area1" 
-            onClick={(actionId, event) => handleButtonClick(`area1_${actionId}`, event)}
-          />
-          <Box>エリア2</Box>
-          <Counter 
-            id="area2"
-            onClick={(actionId, event) => handleButtonClick(`area2_${actionId}`, event)}
-          />
-          <Box>エリア3</Box>
-          <Counter  
-            id="area3"
-            onClick={(actionId, event) => handleButtonClick(`area3_${actionId}`, event)}
-          />
+          {createCounter("area1", "エリア１")}
+          {createCounter("area2", "エリア2")}
+          {createCounter("area3", "エリア3")}
           <Stopwatch 
             id="mainMissionTimer" 
             onClick={(actionId, event) => handleButtonClick(`mainMissionTimer_${actionId}`, event)} 
           />
-        </AccordionDetails>
-      </Accordion>
+        </>
+      ))}
 
-      {/* --- panel2 --- */}
-      <Accordion id="collection" expanded={expanded === 'panel2'} onChange={handleChange('panel2')}>
-        <AccordionSummary aria-controls="panel2d-content" id="collection">
-          <Typography component="span">救援物資回収</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
+      {createAccordion("collection", "panel2", "救援物資回収", (
+        <>
           <FormGroup>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  id="isCollected"
-                  onChange={(e) => {
-                    const checkboxId = `isCollected_${e.target.checked ? 'checked' : 'unchecked'}`;
-                    handleButtonClick(checkboxId, e);
-                  }}
-                />
-              }
-              label="回収成功"
-            />
+            {createCheckbox("isCollected", "回収成功")}
           </FormGroup>
           <FormGroup>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  id="isLanded"
-                  onChange={(e) => {
-                    const checkboxId = `isLanded_${e.target.checked ? 'checked' : 'unchecked'}`;
-                    handleButtonClick(checkboxId, e);
-                  }}
-                />
-              }
-              label="着陸成功"
-            />
+            {createCheckbox("isLanded", "着陸成功")}
           </FormGroup>
-        </AccordionDetails>
-      </Accordion>
+        </>
+      ))}
 
-      {/* --- panel3 --- */}
-      <Accordion expanded={expanded === 'panel3'} id="gliding" onChange={handleChange('panel3')}>
-        <AccordionSummary aria-controls="panel3d-content" id="gliding">
-          <Typography component="span">無動力滑空</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
+      {createAccordion("gliding", "panel3", "無動力滑空", (
+        <>
           <Stopwatch 
             id="glidingTimer"
             onClick={(actionId, event) => handleButtonClick(`glidingTimer_${actionId}`, event)}
           />
           <FormGroup>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  id="isHandsOff"
-                  onChange={(e) => {
-                    const checkboxId = `isHandsOff_${e.target.checked ? 'checked' : 'unchecked'}`;
-                    handleButtonClick(checkboxId, e);
-                  }}
-                />
-              }
-              label="ハンズオフ成功"
-            />
+            {createCheckbox("isHandsOff", "ハンズオフ成功")}
           </FormGroup>
-        </AccordionDetails>
-      </Accordion>
+        </>
+      ))}
 
-      {/* --- panel4 --- */}
-      <Accordion id="poleLoop" expanded={expanded === 'panel4'} onChange={handleChange('panel4')}>
-        <AccordionSummary aria-controls="panel4d-content" id="poleLoop">
-          <Typography component="span">ポール旋回（手動操縦専用）</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <Box>回数</Box>
-          <Counter 
-            id="count"
-            onClick={(actionId, event) => handleButtonClick(`count_${actionId}`, event)}
-          />
-          <Box>連続旋回</Box>
-          <Counter 
-            id="continuousCount"
-            onClick={(actionId, event) => handleButtonClick(`continuousCount_${actionId}`, event)}
-          />
-        </AccordionDetails>
-      </Accordion>
+      {createAccordion("poleLoop", "panel4", "ポール旋回（手動操縦専用）", (
+        <>
+          {createCounter("count", "回数")}
+          {createCounter("continuousCount", "連続旋回")}
+        </>
+      ))}
 
-      {/* --- panel5 --- */}
-      <Accordion id="horizontalLoop" expanded={expanded === 'panel5'} onChange={handleChange('panel5')}>
-        <AccordionSummary aria-controls="panel5d-content" id="horizontalLoop">
-          <Typography component="span">水平旋回（自動操縦専用）</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <Box>回数</Box>
-          <Counter 
-            id="count"
-            onClick={(actionId, event) => handleButtonClick(`count_${actionId}`, event)}
-          />
-          <FormGroup>
-            <FormControlLabel  
-              control={
-                <Checkbox 
-                  id="isContinuous" 
-                  onChange={(e) => {
-                    const checkboxId = `isCotinous_${e.target.checked ? 'checked' : 'unchecked'}`;
-                    handleButtonClick(checkboxId, e);
-                  }}
-                />
-              } 
-              label="連続水平旋回" 
-            />
-          </FormGroup>
-        </AccordionDetails>
-      </Accordion>
-{/* --- panel6 --- */}
-      <Accordion id="risingLoop" expanded={expanded === 'panel105'} onChange={handleChange('panel105')}>
-        <AccordionSummary aria-controls="panel105d-content" id="risingLoop">
-          <Typography component="span">上昇旋回（自動操縦専用）</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <FormGroup>
-            <FormControlLabel  
-              control={
-                <Checkbox 
-                  id="success" 
-                  onChange={(e) => {
-                    const checkboxId = `success_${e.target.checked ? 'checked' : 'unchecked'}`;
-                    handleButtonClick(checkboxId, e);
-                  }}
-                />
-              } 
-              label="成功" 
-            />
-          </FormGroup>
-        </AccordionDetails>
-      </Accordion>
+      {createAccordion("horizontalLoop", "panel5", "水平旋回（自動操縦専用）", (
+        <>
+           <FormGroup>
+          {createCounter("count", "回数")}
+          {createCheckbox("isContinuous", "連続水平旋回")}
+        </FormGroup>
+        </>
+      ))}
 
-      {/* --- panel6 --- */}
-      <Accordion id="eightTurn" expanded={expanded === 'panel6'} onChange={handleChange('panel6')}>
-        <AccordionSummary aria-controls="panel6d-content" id="eightTurn">
-          <Typography component="span">八の字飛行</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <FormGroup>
-            <FormControlLabel  
-              control={
-                <Checkbox 
-                  id="isHandsOff"
-                  onChange={(e) => {
-                    const checkboxId = `isHandsOff_${e.target.checked ? 'checked' : 'unchecked'}`;
-                    handleButtonClick(checkboxId, e);
-                  }}
-                />
-              }
-              label="ハンズオフ飛行"
-            />
+      {createAccordion("risingLoop", "panel6", "上昇旋回（自動操縦専用）", (
+        <>
+           <FormGroup>
+            {createCounter("count", "回数")}
           </FormGroup>
-          <FormGroup>
-            <FormControlLabel  
-              control={
-                <Checkbox 
-                  id="isSuccess"
-                  onChange={(e) => {
-                    const checkboxId = `isSuccess_${e.target.checked ? 'checked' : 'unchecked'}`;
-                    handleButtonClick(checkboxId, e);
-                  }}
-                />
-              }
-              label="成功"
-            />
-          </FormGroup>
-        </AccordionDetails>
-      </Accordion>
+        </>
+      ))}
 
-      {/* --- panel7 --- */}
-      <Accordion id="loop" expanded={expanded === 'panel7'} onChange={handleChange('panel7')}>
-        <AccordionSummary aria-controls="panel7d-content" id="loop">
-          <Typography component="span">宙返り</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <Box>回数</Box>
-          <Counter 
-            id="count"
-            onClick={(actionId, event) => handleButtonClick(`count_${actionId}`, event)}
-          />
-          <FormGroup>
-            <FormControlLabel  
-              control={
-                <Checkbox 
-                  id="isHandsOff"
-                  onChange={(e) => {
-                    const checkboxId = `isHandsOff_${e.target.checked ? 'checked' : 'unchecked'}`;
-                    handleButtonClick(checkboxId, e);
-                  }}
-                />
-              }
-              label="ハンズオフ成功"
-            />
-          </FormGroup>
-        </AccordionDetails>
-      </Accordion>
+      {createAccordion("eightTurn", "panel7", "八の字飛行", (
+        <>
+           <FormGroup>
+            {createCheckbox("isHandsOff", "ハンズオフ飛行")}
+          　 {createCheckbox("isSuccess", "成功")}
+           </FormGroup>
+        </>
+      ))}
 
-      {/* --- panel8 --- */}
-      <Accordion id="highCollection" expanded={expanded === 'panel8'} onChange={handleChange('panel8')}>
-        <AccordionSummary aria-controls="panel8d-content" id="highCollection">
-          <Typography component="span">高所物資回収</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
+      {createAccordion("loop", "panel8", "宙返り", (
+        <>
+          {createCounter("count", "回数")}
           <FormGroup>
-            <FormControlLabel  
-              control={
-                <Checkbox 
-                  id="isCollected"
-                  onChange={(e) => {
-                    const checkboxId = `isCollected_${e.target.checked ? 'checked' : 'unchecked'}`;
-                    handleButtonClick(checkboxId, e);
-                  }}
-                />
-              }
-              label="回収成功"
-            />
+            {createCheckbox("isHandsOff", "ハンズオフ成功")}
           </FormGroup>
-          <FormGroup>
-            <FormControlLabel  
-              control={
-                <Checkbox 
-                  id="isLanded"
-                  onChange={(e) => {
-                    const checkboxId = `isLanded_${e.target.checked ? 'checked' : 'unchecked'}`;
-                    handleButtonClick(checkboxId, e);
-                  }}
-                />
-              }
-              label="着陸成功"
-            />
-          </FormGroup>
-        </AccordionDetails>
-      </Accordion>
+        </>
+      ))}
 
-      {/* --- panel9 --- */}
-      <Accordion id="repair" expanded={expanded === 'panel9'} onChange={handleChange('panel9')}>
-        <AccordionSummary aria-controls="panel9d-content" id="repair">
-          <Typography component="span">修理</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
+      {createAccordion("highCollection", "panel9", "高所物資回収", (
+        <>
+          <FormGroup>
+            {createCheckbox("isCollected", "回収成功")}
+          </FormGroup>
+          <FormGroup>
+           {createCheckbox("isLanded", "着陸成功")}
+          </FormGroup>
+        </>
+      ))}
+
+      {createAccordion("repair", "panel10", "修理", (
+        <>
           <Stopwatch 
             id="repairTimer"
             onClick={(actionId, event) => handleButtonClick(`repairTimer_${actionId}`, event)}
           />
-        </AccordionDetails>
-      </Accordion>
+        </>
+      ))}
 
 
-      {/* --- panel6 --- */}
-      <Accordion id="automaticDrop" expanded={expanded === 'panel106'} onChange={handleChange('panel106')}>
-        <AccordionSummary aria-controls="panel106d-content" id="automaticDrop">
-          <Typography component="span">自動物資投下（自動操縦専用）</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
+      {createAccordion("automaticDrop", "panel11", "自動物資投下（自動操縦専用）", (
+        <>
           <FormGroup>
-            <FormControlLabel  
-              control={
-                <Checkbox 
-                  id="isTakeoffSuccess" 
-                  onChange={(e) => {
-                    const checkboxId = `success_${e.target.checked ? 'checked' : 'unchecked'}`;
-                    handleButtonClick(checkboxId, e);
-                  }}
-                />
-              } 
-              label="自動離陸成功" 
-            />
+            {createCheckbox("isTakeoffSuccess", "自動離陸成功")}
           </FormGroup>
           <FormGroup>
-            <FormControlLabel  
-              control={
-                <Checkbox 
-                  id="isDroppingSuccess" 
-                  onChange={(e) => {
-                    const checkboxId = `success_${e.target.checked ? 'checked' : 'unchecked'}`;
-                    handleButtonClick(checkboxId, e);
-                  }}
-                />
-              } 
-              label="自動投下成功" 
-            />
-          </FormGroup><FormGroup>
-            <FormControlLabel  
-              control={
-                <Checkbox 
-                  id=" isLandingSuccess" 
-                  onChange={(e) => {
-                    const checkboxId = `success_${e.target.checked ? 'checked' : 'unchecked'}`;
-                    handleButtonClick(checkboxId, e);
-                  }}
-                />
-              } 
-              label="自動着陸成功" 
-            />
+          {createCheckbox(" isDroppingSuccess", "自動投下成功")}
           </FormGroup>
-        </AccordionDetails>
-      </Accordion>
+          <FormGroup>
+            {createCheckbox("isLandingSuccess", "自動着陸成功")}
+          </FormGroup>
+        </>
+      ))}
 
-      {/* --- panel10 --- */}
-      <Accordion id="landing" expanded={expanded === 'panel10'} onChange={handleChange('panel10')}>
-        <AccordionSummary aria-controls="panel10d-content" id="landing">
-          <Typography component="span">競技終了</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
+      {createAccordion("landing", "panel12", "競技終了", (
+        <>
           <FormGroup>
-            <FormControlLabel  
-              control={
-                <Checkbox 
-                  id="isAreaTouchDown"
-                  onChange={(e) => {
-                    const checkboxId = `isAreaTouchDown_${e.target.checked ? 'checked' : 'unchecked'}`;
-                    handleButtonClick(checkboxId, e);
-                  }}
-                />
-              }
-              label="エリア内接地"
-            />
-            <FormControlLabel  
-              control={
-                <Checkbox 
-                  id="isInAreaStop"
-                  onChange={(e) => {
-                    const checkboxId = `isInAreaStop_${e.target.checked ? 'checked' : 'unchecked'}`;
-                    handleButtonClick(checkboxId, e);
-                  }}
-                />
-              }
-              label="エリア内静止"
-            />
-            <FormControlLabel  
-              control={
-                <Checkbox 
-                  id="isRunwayLanding"
-                  onChange={(e) => {
-                    const checkboxId = `isRunwayLanding_${e.target.checked ? 'checked' : 'unchecked'}`;
-                    handleButtonClick(checkboxId, e);
-                  }}
-                />
-              }
-              label="滑走路内着陸"
-            />
+             {createCheckbox("isAreaTouchDown", "エリア内接地")}
+             {createCheckbox("isInAreaStop", "エリア内静止")}
+            {createCheckbox("isRunwayLanding", "滑走路内着陸")}
           </FormGroup>
-        </AccordionDetails>
-      </Accordion>
+        </>
+      ))}
     </div>
   );
 }

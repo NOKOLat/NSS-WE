@@ -165,7 +165,7 @@ export default function Accordions_Multicopter({ sendJsonMessage }: Props) {
     sendJsonMessage(jsonData);
   };
 
-  // 共通送信関数を追加
+  // 共通送信関数
 const sendData = (params: any) => {
   const category = 'multicopter';
   const currentNum2 = getCurrentNum2();
@@ -182,171 +182,93 @@ const sendData = (params: any) => {
   sendJsonMessage(jsonData);
 };
 
+// Checkbox
+const createCheckbox = (id: string, label: string) => (
+  <FormControlLabel
+    control={
+      <Checkbox
+        id={id}
+        sx={{ color: '#fff' }}
+        onChange={(e) => {
+          const checkboxId = `${id}_${e.target.checked ? 'checked' : 'unchecked'}`;
+          handleButtonClick(checkboxId, e);
+        }}
+      />
+    }
+    label={label}
+  />
+);
+
+// Counter
+const createCounter = (id: string, label: string) => (
+  <>
+    <Box>{label}</Box>
+    <Counter 
+      id={id} 
+      onClick={(actionId, event) => handleButtonClick(`${id}_${actionId}`, event)}
+    />
+  </>
+);
+
+// Accordion
+const createAccordion = (id: string, panel: string, title: string, children: React.ReactNode) => (
+  <Accordion id={id} expanded={expanded === panel} onChange={handleChange(panel)}>
+    <AccordionSummary aria-controls={`${panel}d-content`} id={id}>
+      <Typography component="span">{title}</Typography>
+    </AccordionSummary>
+    <AccordionDetails>
+      {children}
+    </AccordionDetails>
+  </Accordion>
+);
+
   return (
     <div>
-      <Accordion id="mainmission" expanded={expanded === 'panel1'} onChange={handleChange('panel1')}>
-        <AccordionSummary aria-controls="panel1d-content" id="mainmission">
-          <Typography component="span">メインミッション</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <Box>投下エリア</Box>
-          <Counter 
-            id="droparea" 
-            onClick={(actionId, event) => handleButtonClick(`droparea_${actionId}`, event)}
-          />
-          <Box>高所運搬</Box>
-          <Counter 
-            id="box"
-            onClick={(actionId, event) => handleButtonClick(`box_${actionId}`, event)}
-          />
-          
-          <FormGroup>
-          <FormControlLabel
-  control={
-    <Checkbox
-      id="isCollect"
-      sx={{ color: '#fff' }}
-      onChange={(e) => {
-        const checkboxId = `isCollect_${e.target.checked ? 'checked' : 'unchecked'}`;
-        handleButtonClick(checkboxId, e);
-      }}
-    />
-  }
-  label="救援物資（大）回収成功"
-/>
-        </FormGroup>
+      {createAccordion("mainmission", "panel1", "メインミッション", (
+        <>
+          {createCounter("droparea", "投下エリア")}
+          {createCounter("box", "高所運搬")}
         <FormGroup>
-          <FormControlLabel
-  control={
-    <Checkbox
-      id="isDrropedToBox"
-      sx={{ color: '#fff' }}
-      onChange={(e) => {
-        const checkboxId = `isDrropedToBox_${e.target.checked ? 'checked' : 'unchecked'}`;
-        handleButtonClick(checkboxId, e);
-      }}
-    />
-  }
-  label="救援物資（大）運搬成功" />
+          {createCheckbox("isCollect", "救援物資（大）回収成功")}
+          {createCheckbox("isDrropedToBox", "救援物資（大）運搬成功")}
         </FormGroup>
-        
           <Stopwatch 
             id="mainmission_timer"
             onClick={(actionId, event) => handleButtonClick(`mainmission_timer_${actionId}`, event)}
           />
-
-        </AccordionDetails>
-      </Accordion>
-      <Accordion expanded={expanded === 'panel2'} onChange={handleChange('panel2')}>
-        <AccordionSummary aria-controls="panel2d-content" id="panel2d-header">
-          <Typography component="span">大型貨物運搬</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
+        </>
+      ))}
+      {createAccordion("panel2", "panel2", "大型貨物運搬", (
         <FormGroup>
-        <FormControlLabel
-  control={
-    <Checkbox
-      id="isTransported"
-      sx={{ color: '#fff' }}
-      onChange={(e) => {
-        const checkboxId = `isTransported_${e.target.checked ? 'checked' : 'unchecked'}`;
-        handleButtonClick(checkboxId, e);
-      }}
-    />
-  }
-  label="運搬"
-/>
+        {createCheckbox("isTransported", "運搬")}
+          {createCheckbox("isLanded", "着陸")}
          </FormGroup>
-
-         <FormGroup>
-         <FormControlLabel  control={<Checkbox id= "isLanded" sx={{ color: '#fff' }} onChange={(e) => {
-    const checkboxId = `isLanded_${e.target.checked ? 'checked' : 'unchecked'}`;
-    handleButtonClick(checkboxId, e);
-  }} />}
-          label="着陸" />
-          </FormGroup>
-
-        </AccordionDetails>
-      </Accordion>
-      <Accordion expanded={expanded === 'panel3'} onChange={handleChange('panel3')}>
-        <AccordionSummary aria-controls="panel3d-content" id="panel3d-header">
-          <Typography component="span">8の字飛行</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
+      ))}
+      {createAccordion("panel3", "panel3", "8の字飛行", (
         <FormGroup>
-        <FormControlLabel
-  control={
-    <Checkbox
-      id="isHandsOff"
-      sx={{ color: '#fff' }}
-      onChange={(e) => {
-        const checkboxId = `isHandsOff_${e.target.checked ? 'checked' : 'unchecked'}`;
-        handleButtonClick(checkboxId, e);
-      }}
-    />
-  }
-  label="ハンズオフ飛行"
-/>
-         </FormGroup>
-
-         <FormGroup>
-         <FormControlLabel
-  control={
-    <Checkbox
-      id="isSuccess"
-      sx={{ color: '#fff' }}
-      onChange={(e) => {
-        const checkboxId = `isSuccess_${e.target.checked ? 'checked' : 'unchecked'}`;
-        handleButtonClick(checkboxId, e);
-      }}
-    />
-  }
-  label="成功" />
-          </FormGroup>
-        </AccordionDetails>
-        
-      </Accordion>
-      <Accordion id="failsafecontrol" expanded={expanded === 'panel4'} onChange={handleChange('panel4')}>
-        <AccordionSummary aria-controls="panel4d-content" id="failsafecontrol">
-          <Typography component="span">耐故障制御</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
+          {createCheckbox("isSuccess", "成功")}
+          {createCheckbox("isHandsOff", "ハンズオフ飛行")}
+        </FormGroup>
+      ))}
+      {createAccordion("failsafecontrol", "panel4", "耐故障制御", (
+        <>
         <Stopwatch 
           id="failsafe_timer"
           onClick={(actionId, event) => handleButtonClick(`failsafe_timer_${actionId}`, event)}
         />
         <FormGroup>
-         <FormControlLabel  control={<Checkbox 
-         id= "failsafe_isHandsOff"
-          sx={{ color: '#fff',  }}
-          onChange={(e) => {
-        const checkboxId = `failsafe_isHandsOff_${e.target.checked ? 'checked' : 'unchecked'}`;
-        handleButtonClick(checkboxId, e);
-      }} />}
-       label="ハンズオフ飛行" />
-          </FormGroup>
-        </AccordionDetails>
-        
-      </Accordion>
-      <Accordion expanded={expanded === 'panel5'} onChange={handleChange('panel5')}>
-        <AccordionSummary aria-controls="panel5d-content" id="panel5d-header">
-          <Typography component="span">ユニークミッション</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
+         {createCheckbox("failsafe_isHandsOff", "ハンズオフ飛行")}
+        </FormGroup>
+        </>
+      ))}
+      {createAccordion("panel5", "panel5", "ユニークミッション", (
+        <>
           <Stopwatch 
             id="unique_timer"
             onClick={(actionId, event) => handleButtonClick(`unique_timer_${actionId}`, event)}
           />
           <FormGroup>
-            <FormControlLabel  control={<Checkbox
-              id="unique_isSuccess"
-              sx={{ color: '#fff' }}
-              onChange={(e) => {
-                const checkboxId = `unique_isSuccess_${e.target.checked ? 'checked' : 'unchecked'}`;
-                handleButtonClick(checkboxId, e);
-              }}
-            />} 
-            label="成功" />
+            {createCheckbox("unique_isSuccess", "成功")}
           </FormGroup>
           <Box id="score" sx={{ mt: 2 }}>
             <Typography component="span" sx={{ mr: 1 }}>
@@ -379,87 +301,32 @@ const sendData = (params: any) => {
               完了
             </Button>
           </Box>
-        </AccordionDetails>
-      </Accordion>
-      <Accordion expanded={expanded === 'panel6'} onChange={handleChange('panel6')}>
-        <AccordionSummary aria-controls="panel6d-content" id="hovering">
-          <Typography component="span">ホバリング</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
+        </>
+      ))}
+      {createAccordion("panel6", "panel6", "ホバリング", (
+        <>
         <Stopwatch 
           id="hovering_timer"
           onClick={(actionId, event) => handleButtonClick(`hovering_timer_${actionId}`, event)}
         />
         <FormGroup>
-         <FormControlLabel
-  control={
-    <Checkbox
-      id="isHandsOff"
-      sx={{ color: '#fff' }}
-      onChange={(e) => {
-        const checkboxId = `isHandsOff_${e.target.checked ? 'checked' : 'unchecked'}`;
-        handleButtonClick(checkboxId, e);
-      }}
-    />
-  }
-  label="ハンズオフ飛行"
-/>
+         {createCheckbox("isHandsOff", "ハンズオフ飛行")}
           </FormGroup>
          
-         </AccordionDetails>
-        
-      </Accordion>
-      
-     
-      <Accordion expanded={expanded === 'panel9'} onChange={handleChange('panel9')}>
-        <AccordionSummary aria-controls="panel9d-content" id="panel9d-header">
-          <Typography component="span">修理</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
+        </>
+      ))}
+      {createAccordion("panel7", "panel7", "修理", (
         <Stopwatch 
           id="repair_timer"
           onClick={(actionId, event) => handleButtonClick(`repair_timer_${actionId}`, event)}
         />
-        </AccordionDetails>
-        
-      </Accordion>
-      <Accordion expanded={expanded === 'panel10'} onChange={handleChange('panel10')}>
-        <AccordionSummary aria-controls="panel10d-content" id="panel10d-header">
-          <Typography component="span">競技終了</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
+      ))}
+      {createAccordion("panel8", "panel8", "競技終了", (
         <FormGroup>
-         <FormControlLabel
-  control={
-    <Checkbox
-      id="isAreaTouchDown"
-      sx={{ color: '#fff' }}
-      onChange={(e) => {
-        const checkboxId = `isAreaTouchDown_${e.target.checked ? 'checked' : 'unchecked'}`;
-        handleButtonClick(checkboxId, e);
-      }}
-    />
-  }
-  label="エリア内接地"
- />
-         <FormControlLabel
-  control={
-    <Checkbox
-      id="isInAreaStop"
-      sx={{ color: '#fff' }}
-      onChange={(e) => {
-        const checkboxId = `isInAreaStop_${e.target.checked ? 'checked' : 'unchecked'}`;
-        handleButtonClick(checkboxId, e);
-      }}
-    />
-  }
-  label="エリア内停止"
- />
-          </FormGroup>
-        </AccordionDetails>
-        
-      </Accordion>
-
+         {createCheckbox("isAreaTouchDown", "エリア内接地")}
+         {createCheckbox("isInAreaStop", "エリア内停止")}
+        </FormGroup>
+      ))}
     </div>
   );
 }
