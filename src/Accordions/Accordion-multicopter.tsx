@@ -17,7 +17,7 @@ import Counter from '../Components/Counter';
 import Stopwatch from '../Components/Timer'
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button'; // 追加
-import { createButtonClickData, saveJsonToFile } from '../Data/handleButtonClick.tsx';
+import { createButtonClickData, saveJsonToFile,sendJsonToServer } from '../Data/handleButtonClick.tsx';
 import { getCurrentNum2, getUnixTimestamp } from '../Data/time';
 
 const Accordion = styled((props: AccordionProps) => (
@@ -62,7 +62,11 @@ const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
   borderTop: '1px solid rgba(0, 0, 0, .125)',
 }));
 
-export default function Accordions_Multicopter() {
+interface Props {
+  sendJsonMessage: (data: any) => void;
+}
+
+export default function Accordions_Multicopter({ sendJsonMessage }: Props) {
   const [expanded, setExpanded] = React.useState<string | false>('panel1');
   const handleChange = (panel: string) => (event: React.SyntheticEvent, newExpanded: boolean) => {
     setExpanded(newExpanded ? panel : false);
@@ -70,6 +74,17 @@ export default function Accordions_Multicopter() {
 
   const handleButtonClick = (id: string, event?: any) => {
     const category = 'multicopter';
+    let section = 'mainmission';
+
+    // AccordionDetailsから親AccordionのIDを取得（最初に一度だけ）
+    if (event && event.target) {
+      const accordionDetails = event.target.closest('.MuiAccordionDetails-root');
+      const accordion = accordionDetails?.closest('.MuiAccordion-root');
+      if (accordion && accordion.id) {
+        section = accordion.id;
+      }
+    }
+
     const currentNum2 = getCurrentNum2();
     const adjustedEpoch = getUnixTimestamp() + currentNum2;
 
@@ -87,6 +102,7 @@ export default function Accordions_Multicopter() {
         }
       };
       saveJsonToFile(jsonData);
+      sendJsonMessage(jsonData);
       return;
     }
 
@@ -104,6 +120,7 @@ export default function Accordions_Multicopter() {
         }
       };
       saveJsonToFile(jsonData);
+      sendJsonMessage(jsonData);
       return;
     }
 
@@ -125,6 +142,7 @@ export default function Accordions_Multicopter() {
         }
       };
       saveJsonToFile(jsonData);
+      sendJsonMessage(jsonData);
       return;
     }
 
@@ -141,6 +159,7 @@ export default function Accordions_Multicopter() {
         }
       };
       saveJsonToFile(jsonData);
+      sendJsonMessage(jsonData);
       return;
     }
     if (id === 'isHandsOff_unchecked' && section === 'hovering') {
@@ -155,6 +174,7 @@ export default function Accordions_Multicopter() {
         }
       };
       saveJsonToFile(jsonData);
+      sendJsonMessage(jsonData);
       return;
     }
 
@@ -176,6 +196,7 @@ export default function Accordions_Multicopter() {
         }
       };
       saveJsonToFile(jsonData);
+      sendJsonMessage(jsonData);
       return;
     }
 
@@ -193,6 +214,7 @@ export default function Accordions_Multicopter() {
         }
       };
       saveJsonToFile(jsonData);
+      sendJsonMessage(jsonData);
       return;
     }
 
@@ -213,6 +235,7 @@ export default function Accordions_Multicopter() {
         }
       };
       saveJsonToFile(jsonData);
+      sendJsonMessage(jsonData);
       return;
     }
 
@@ -230,6 +253,7 @@ export default function Accordions_Multicopter() {
         }
       };
       saveJsonToFile(jsonData);
+      sendJsonMessage(jsonData);
       return;
     }
 
@@ -250,6 +274,7 @@ export default function Accordions_Multicopter() {
         }
       };
       saveJsonToFile(jsonData);
+      sendJsonMessage(jsonData);
       return;
     }
 
@@ -267,6 +292,7 @@ export default function Accordions_Multicopter() {
         }
       };
       saveJsonToFile(jsonData);
+      sendJsonMessage(jsonData);
       return;
     }
 
@@ -284,6 +310,7 @@ export default function Accordions_Multicopter() {
         }
       };
       saveJsonToFile(jsonData);
+      sendJsonMessage(jsonData);
       return;
     }
 
@@ -301,6 +328,7 @@ export default function Accordions_Multicopter() {
         }
       };
       saveJsonToFile(jsonData);
+      sendJsonMessage(jsonData);
       return;
     }
 
@@ -318,6 +346,7 @@ export default function Accordions_Multicopter() {
         }
       };
       saveJsonToFile(jsonData);
+      sendJsonMessage(jsonData);
       return;
     }
 
@@ -339,6 +368,7 @@ export default function Accordions_Multicopter() {
         }
       };
       saveJsonToFile(jsonData);
+      sendJsonMessage(jsonData);
       return;
     }
 
@@ -358,6 +388,7 @@ export default function Accordions_Multicopter() {
         }
       };
       saveJsonToFile(jsonData);
+      sendJsonMessage(jsonData);
       return;
     }
 
@@ -377,6 +408,7 @@ export default function Accordions_Multicopter() {
         }
       };
       saveJsonToFile(jsonData);
+      sendJsonMessage(jsonData);
       return;
     }
 
@@ -394,10 +426,11 @@ export default function Accordions_Multicopter() {
         }
       };
       saveJsonToFile(jsonData);
+      sendJsonMessage(jsonData);
       return;
     }
 
-    // 最後に通常処理
+    // --- 最後に通常処理 ---
     const [counterId, action] = id.split('_');
     let value;
     if (action === 'increment') value = 1;
@@ -405,16 +438,6 @@ export default function Accordions_Multicopter() {
     else if (action === 'checked') value = true;
     else if (action === 'unchecked') value = false;
     else value = 1;
-
-    // sectionの取得
-    let section = 'mainmission';
-    if (event && event.target) {
-      const accordionDetails = event.target.closest('.MuiAccordionDetails-root');
-      const accordion = accordionDetails?.closest('.MuiAccordion-root');
-      if (accordion && accordion.id) {
-        section = accordion.id;
-      }
-    }
 
     const jsonData = {
       action: "update",
@@ -428,6 +451,7 @@ export default function Accordions_Multicopter() {
     };
 
     saveJsonToFile(jsonData);
+    sendJsonMessage(jsonData);
   };
 
   // スコア入力値を保持するstateを追加
@@ -451,6 +475,7 @@ export default function Accordions_Multicopter() {
       }
     };
     saveJsonToFile(jsonData);
+    sendJsonMessage(jsonData);
   };
 
   return (

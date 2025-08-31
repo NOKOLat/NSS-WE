@@ -4,9 +4,10 @@ import Stopwatch from '../Components/Timer';
 import '../App.css';
 import Accordions_Multicopter from '../Accordions/Accordion-multicopter';
 import Typography from '@mui/material/Typography';
-import { saveJsonToFile } from '../Data/handleButtonClick';
+import { saveJsonToFile ,sendJsonToServer} from '../Data/handleButtonClick';
 import { getCurrentNum2, getUnixTimestamp } from '../Data/time';
 import { useNavigate } from "react-router-dom";
+import useWebSocket from 'react-use-websocket'; 
 
 interface Props {
   window?: () => Window;
@@ -16,6 +17,12 @@ interface Props {
 export default function Multicopter(props: Props) {
   const navigate = useNavigate();
   const drawerWidth = 240; 
+
+  // WebSocket送信関数を取得
+  const { sendJsonMessage } = useWebSocket('ws://localhost:8765', {
+    share: true,
+    shouldReconnect: () => true,
+  });
 
   const handleTimerClick = (action: string, timestamp: number) => {
     const currentNum2 = getCurrentNum2();
@@ -34,6 +41,7 @@ export default function Multicopter(props: Props) {
       }
     };
     saveJsonToFile(jsonData);
+    sendJsonToServer(jsonData, sendJsonMessage); 
   };
 
   return (
@@ -47,7 +55,7 @@ export default function Multicopter(props: Props) {
           onClick={handleTimerClick}
         />
         <React.StrictMode>
-          <Accordions_Multicopter/>  
+          <Accordions_Multicopter sendJsonMessage={sendJsonMessage}/>  
         </React.StrictMode>
       </ResponsiveDrawer>
     </React.Fragment>

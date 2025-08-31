@@ -12,7 +12,7 @@ import MuiAccordionSummary, {AccordionSummaryProps,accordionSummaryClasses,} fro
 import MuiAccordionDetails from '@mui/material/AccordionDetails';
 import Counter from '../Components/Counter.tsx'
 import Stopwatch from '../Components/Timer.tsx'
-import { createButtonClickData, saveJsonToFile } from '../Data/handleButtonClick.tsx';
+import { createButtonClickData, saveJsonToFile,sendJsonToServer } from '../Data/handleButtonClick.tsx';
 import { getCurrentNum2, getUnixTimestamp } from '../Data/time';
 
 const Accordion = styled((props: AccordionProps) => (
@@ -54,81 +54,86 @@ const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
   borderTop: '1px solid rgba(0, 0, 0, .125)',
 }));
 
-const handleButtonClick = (id: string, event?: any) => {
-  const category = 'plane';
-  let section = 'mainmission';
+interface Props {
+  sendJsonMessage: (data: any) => void;
+}
 
-  // TimerのIDから直接sectionを判定
-  const [counterId, action] = id.split('_');
-  
-  if (counterId === 'mainMissionTimer') {
-    section = 'mainmission';
-  } else if (counterId === 'glidingTimer') {
-    section = 'gliding';
-  } else if (counterId === 'repairTimer') {
-    section = 'repair';
-  } else if (event && event.target) {
-    // CheckboxやCounterの場合は従来通り
-    const accordionDetails = event.target.closest('.MuiAccordionDetails-root');
-    const accordion = accordionDetails?.closest('.MuiAccordion-root');
-    if (accordion && accordion.id) {
-      section = accordion.id;
+export default function Accordions_Plane({ sendJsonMessage }: Props) {
+  const [expanded, setExpanded] = React.useState<string | false>('panel1');
+  const handleChange =
+    (panel: string) => (event: React.SyntheticEvent, newExpanded: boolean) => {
+      setExpanded(newExpanded ? panel : false);
+    };
+
+  // ここでhandleButtonClickを定義
+  const handleButtonClick = (id: string, event?: any) => {
+    const category = 'plane';
+    let section = 'mainmission';
+
+    const [counterId, action] = id.split('_');
+
+    if (counterId === 'mainMissionTimer') {
+      section = 'mainmission';
+    } else if (counterId === 'glidingTimer') {
+      section = 'gliding';
+    } else if (counterId === 'repairTimer') {
+      section = 'repair';
+    } else if (event && event.target) {
+      const accordionDetails = event.target.closest('.MuiAccordionDetails-root');
+      const accordion = accordionDetails?.closest('.MuiAccordion-root');
+      if (accordion && accordion.id) {
+        section = accordion.id;
+      }
     }
-  }
 
-  const currentNum2 = getCurrentNum2();
-  const adjustedEpoch = getUnixTimestamp() + currentNum2;
+    const currentNum2 = getCurrentNum2();
+    const adjustedEpoch = getUnixTimestamp() + currentNum2;
 
-  if (
-    counterId.toLowerCase().includes('timer') &&
-    (action === 'start' || action === 'stop')
-  ) {
-    const timeKey = action === 'start' ? 'start' : 'end';
-    const adjustedTimestamp = Date.now() + currentNum2;
+    if (
+      counterId.toLowerCase().includes('timer') &&
+      (action === 'start' || action === 'stop')
+    ) {
+      const timeKey = action === 'start' ? 'start' : 'end';
+      const adjustedTimestamp = Date.now() + currentNum2;
+      const jsonData = {
+        action: "update",
+        category: category,
+        epoch: adjustedEpoch,
+        params: {
+          [section]: {
+            epoch: {
+              [timeKey]: adjustedTimestamp
+            }
+          }
+        }
+      };
+      saveJsonToFile(jsonData);
+      sendJsonToServer(jsonData, sendJsonMessage);
+      return;
+    }
+
+    // 通常の処理
+    let value;
+    if (action === 'increment') value = 1;
+    else if (action === 'decrement') value = -1;
+    else if (action === 'checked') value = true;
+    else if (action === 'unchecked') value = false;
+    else value = 1;
+
     const jsonData = {
       action: "update",
       category: category,
       epoch: adjustedEpoch,
       params: {
         [section]: {
-          epoch: {
-            [timeKey]: adjustedTimestamp
-          }
+          [counterId]: value
         }
       }
     };
+
     saveJsonToFile(jsonData);
-    return;
-  }
-
-  // 通常の処理
-  let value;
-  if (action === 'increment') value = 1;
-  else if (action === 'decrement') value = -1;
-  else if (action === 'checked') value = true;
-  else if (action === 'unchecked') value = false;
-  else value = 1;
-
-  const jsonData = {
-    action: "update",
-    category: category,
-    epoch: adjustedEpoch,
-    params: {
-      [section]: {
-        [counterId]: value
-      }
-    }
+    sendJsonToServer(jsonData, sendJsonMessage);
   };
-
-  saveJsonToFile(jsonData);
-};
-
-export default function Accordions_Plane() {
-  const [expanded, setExpanded] = React.useState<string | false>('panel1');
-  const handleChange =
-    (panel: string) => (event: React.SyntheticEvent, newExpanded: boolean) => {
-      setExpanded(newExpanded ? panel : false);
-    };
 
   return (
     <div>

@@ -25,7 +25,7 @@ export const saveJsonToFile = (data: ButtonClickData): void => {
   const url = window.URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `button_${data.buttonId}_${Date.now()}.json`;
+  a.download = `button_${Date.now()}.json`;
   a.click();
   window.URL.revokeObjectURL(url);
 };
@@ -34,3 +34,12 @@ const handleButtonClick = (id: string, num2: number, category: string) => {
   const jsonData = createButtonClickData(id, num2, category)
   saveJsonToFile(jsonData);
 };
+
+
+
+export const sendJsonToServer = (jsonData: any, sendJsonMessage?: (data: any) => void) => {
+  if (sendJsonMessage) {
+    sendJsonMessage(jsonData);
+  }
+};
+

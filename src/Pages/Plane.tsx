@@ -4,11 +4,17 @@ import Stopwatch from '../Components/Timer';
 import '../App.css';
 import Accordions_Plane from '../Accordions/Accordion-plane';
 import Typography from '@mui/material/Typography';
-import { saveJsonToFile } from '../Data/handleButtonClick';
+import { saveJsonToFile ,sendJsonToServer} from '../Data/handleButtonClick';
 import { getCurrentNum2, getUnixTimestamp } from '../Data/time';
+import useWebSocket from 'react-use-websocket';
 
 
 export default function Plane() {
+  const { sendJsonMessage } = useWebSocket('ws://localhost:8765', {
+    share: true,
+    shouldReconnect: () => true,
+  });
+
   const handleTimerClick = (action: string, timestamp: number) => {
     const currentNum2 = getCurrentNum2();
 
@@ -30,6 +36,7 @@ export default function Plane() {
     };
 
     saveJsonToFile(jsonData);
+    sendJsonToServer(jsonData, sendJsonMessage); 
   };
 
   return (
@@ -43,7 +50,7 @@ export default function Plane() {
             onClick={handleTimerClick}
           />
           <React.StrictMode>        
-            <Accordions_Plane/>
+            <Accordions_Plane sendJsonMessage={sendJsonMessage}/>  
           </React.StrictMode>
         </ResponsiveDrawer>
     </React.Fragment>
