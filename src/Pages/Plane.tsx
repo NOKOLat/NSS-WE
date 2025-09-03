@@ -10,10 +10,28 @@ import useWebSocket from 'react-use-websocket';
 
 
 export default function Plane() {
-  const { sendJsonMessage } = useWebSocket('ws://localhost:8765', {
+  const { sendJsonMessage, lastJsonMessage, lastMessage } = useWebSocket('ws://localhost:8765', {
     share: true,
     shouldReconnect: () => true,
   });
+
+  // サーバーから受信したparamsを保持
+  const [serverParams, setServerParams] = React.useState<any>({});
+
+  React.useEffect(() => {
+    if (lastJsonMessage && lastJsonMessage.action === "update" && lastJsonMessage.category === "plane") {
+      setServerParams(lastJsonMessage.params);
+    }
+  }, [lastJsonMessage]);
+
+  React.useEffect(() => {
+    if (lastJsonMessage) {
+      console.log('受信したJSON:', lastJsonMessage);
+    }
+    if (lastMessage) {
+      console.log('受信した生メッセージ:', lastMessage.data);
+    }
+  }, [lastJsonMessage, lastMessage]);
 
   const handleTimerClick = (action: string, timestamp: number) => {
     const currentNum2 = getCurrentNum2();
@@ -48,9 +66,14 @@ export default function Plane() {
           <Stopwatch 
             id="timer"
             onClick={handleTimerClick}
+            start={serverParams?.timer?.start}
+            end={serverParams?.timer?.end}
           />
           <React.StrictMode>        
-            <Accordions_Plane sendJsonMessage={sendJsonMessage}/>  
+            <Accordions_Plane 
+              sendJsonMessage={sendJsonMessage}
+              serverParams={serverParams}
+            />  
           </React.StrictMode>
         </ResponsiveDrawer>
     </React.Fragment>

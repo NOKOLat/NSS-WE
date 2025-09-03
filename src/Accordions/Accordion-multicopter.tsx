@@ -61,9 +61,10 @@ const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
 
 interface Props {
   sendJsonMessage: (data: any) => void;
+  serverParams: any;
 }
 
-export default function Accordions_Multicopter({ sendJsonMessage }: Props) {
+export default function Accordions_Multicopter({ sendJsonMessage, serverParams }: Props) {
   const [expanded, setExpanded] = React.useState<string | false>('panel1');
   const handleChange = (panel: string) => (event: React.SyntheticEvent, newExpanded: boolean) => {
     setExpanded(newExpanded ? panel : false);
@@ -180,28 +181,41 @@ const sendData = (params: any) => {
 };
 
 // Checkbox
-const createCheckbox = (id: string, label: string) => (
-  <FormControlLabel
-    control={
-      <Checkbox
-        id={id}
-        sx={{ color: '#fff' }}
-        onChange={(e) => {
-          const checkboxId = `${id}_${e.target.checked ? 'checked' : 'unchecked'}`;
-          handleButtonClick(checkboxId, e);
-        }}
-      />
-    }
-    label={label}
-  />
-);
+const createCheckbox = (id: string, label: string, section: string, nestedKey?: string) => {
+  // 通常は serverParams[section][id]
+  // nestedKeyがあれば serverParams[section][nestedKey][id]
+  let checked = false;
+  if (nestedKey) {
+    checked = serverParams?.[section]?.[nestedKey]?.[id] ?? false;
+  } else {
+    checked = serverParams?.[section]?.[id] ?? false;
+  }
+
+  return (
+    <FormControlLabel
+      control={
+        <Checkbox
+          id={id}
+          sx={{ color: '#fff' }}
+          checked={checked}
+          onChange={(e) => {
+            const checkboxId = `${id}_${e.target.checked ? 'checked' : 'unchecked'}`;
+            handleButtonClick(checkboxId, e);
+          }}
+        />
+      }
+      label={label}
+    />
+  );
+};
 
 // Counter
-const createCounter = (id: string, label: string) => (
+const createCounter = (id: string, label: string, section: string) => (
   <>
     <Box>{label}</Box>
     <Counter 
       id={id} 
+      value={serverParams?.[section]?.[id] ?? 0}
       onClick={(actionId, event) => handleButtonClick(`${id}_${actionId}`, event)}
     />
   </>
@@ -223,49 +237,59 @@ const createAccordion = (id: string, panel: string, title: string, children: Rea
     <div>
       {createAccordion("mainmission", "panel1", "メインミッション", (
         <>
-          {createCounter("droparea", "投下エリア")}
-          {createCounter("box", "高所運搬")}
-        <FormGroup>
-          {createCheckbox("isCollect", "救援物資（大）回収成功")}
-          {createCheckbox("isDrropedToBox", "救援物資（大）運搬成功")}
-        </FormGroup>
+          {createCounter("droparea", "投下エリア", "mainmission")}
+          {createCounter("box", "高所運搬", "mainmission")}
+          <FormGroup>
+            {createCheckbox("isCollect", "救援物資（大）回収成功", "mainmission", "largeSupply")}
+            {createCheckbox("isDroppedToBox", "救援物資（大）運搬成功", "mainmission", "largeSupply")}
+          </FormGroup>
           <Stopwatch 
             id="mainmission_timer"
+            start={serverParams?.mainmission?.epoch?.start}
+            end={serverParams?.mainmission?.epoch?.end}
             onClick={(actionId, event) => handleButtonClick(`mainmission_timer_${actionId}`, event)}
           />
         </>
       ))}
-      {createAccordion("panel2", "panel2", "大型貨物運搬", (
+
+      {createAccordion("zaqtransportation", "panel2", "大型貨物運搬", (
         <FormGroup>
-        {createCheckbox("isTransported", "運搬")}
-          {createCheckbox("isLanded", "着陸")}
-         </FormGroup>
-      ))}
-      {createAccordion("panel3", "panel3", "8の字飛行", (
-        <FormGroup>
-          {createCheckbox("isSuccess", "成功")}
-          {createCheckbox("isHandsOff", "ハンズオフ飛行")}
+          {createCheckbox("isTransported", "運搬", "zaqtransportation")}
+          {createCheckbox("isLanded", "着陸", "zaqtransportation")}
         </FormGroup>
       ))}
+
+      {createAccordion("eightTurn", "panel3", "8の字飛行", (
+        <FormGroup>
+          {createCheckbox("isSuccess", "成功", "eightTurn")}
+          {createCheckbox("isHandsOff", "ハンズオフ飛行", "eightTurn")}
+        </FormGroup>
+      ))}
+
       {createAccordion("failsafecontrol", "panel4", "耐故障制御", (
         <>
-        <Stopwatch 
-          id="failsafe_timer"
-          onClick={(actionId, event) => handleButtonClick(`failsafe_timer_${actionId}`, event)}
-        />
-        <FormGroup>
-         {createCheckbox("failsafe_isHandsOff", "ハンズオフ飛行")}
-        </FormGroup>
+          <Stopwatch 
+            id="failsafe_timer"
+            start={serverParams?.failsafecontrol?.epoch?.start}
+            end={serverParams?.failsafecontrol?.epoch?.end}
+            onClick={(actionId, event) => handleButtonClick(`failsafe_timer_${actionId}`, event)}
+          />
+          <FormGroup>
+            {createCheckbox("failsafe_isHandsOff", "ハンズオフ飛行", "failsafecontrol")}
+          </FormGroup>
         </>
       ))}
-      {createAccordion("panel5", "panel5", "ユニークミッション", (
+
+      {createAccordion("uniqueMisson", "panel5", "ユニークミッション", (
         <>
           <Stopwatch 
             id="unique_timer"
+            start={serverParams?.uniqueMisson?.epoch?.start}
+            end={serverParams?.uniqueMisson?.epoch?.end}
             onClick={(actionId, event) => handleButtonClick(`unique_timer_${actionId}`, event)}
           />
           <FormGroup>
-            {createCheckbox("unique_isSuccess", "成功")}
+            {createCheckbox("unique_isSuccess", "成功", "uniqueMisson")}
           </FormGroup>
           <Box id="score" sx={{ mt: 2 }}>
             <Typography component="span" sx={{ mr: 1 }}>
@@ -293,35 +317,41 @@ const createAccordion = (id: string, panel: string, title: string, children: Rea
               color="primary"
               sx={{ ml: 2 }}
               onClick={handleScoreComplete}
-              disabled={scoreValue === ''} // 空欄の時は押せない
+              disabled={scoreValue === ''}
             >
               完了
             </Button>
           </Box>
         </>
       ))}
-      {createAccordion("panel6", "panel6", "ホバリング", (
+
+      {createAccordion("hovering", "panel6", "ホバリング", (
         <>
-        <Stopwatch 
-          id="hovering_timer"
-          onClick={(actionId, event) => handleButtonClick(`hovering_timer_${actionId}`, event)}
-        />
-        <FormGroup>
-         {createCheckbox("isHandsOff", "ハンズオフ飛行")}
+          <Stopwatch 
+            id="hovering_timer"
+            start={serverParams?.hovering?.epoch?.start}
+            end={serverParams?.hovering?.epoch?.end}
+            onClick={(actionId, event) => handleButtonClick(`hovering_timer_${actionId}`, event)}
+          />
+          <FormGroup>
+            {createCheckbox("isHandsOff", "ハンズオフ飛行", "hovering")}
           </FormGroup>
-         
         </>
       ))}
-      {createAccordion("panel7", "panel7", "修理", (
+
+      {createAccordion("repair", "panel7", "修理", (
         <Stopwatch 
           id="repair_timer"
+          start={serverParams?.repair?.epoch?.start}
+          end={serverParams?.repair?.epoch?.end}
           onClick={(actionId, event) => handleButtonClick(`repair_timer_${actionId}`, event)}
         />
       ))}
-      {createAccordion("panel8", "panel8", "競技終了", (
+
+      {createAccordion("landing", "panel8", "競技終了", (
         <FormGroup>
-         {createCheckbox("isAreaTouchDown", "エリア内接地")}
-         {createCheckbox("isInAreaStop", "エリア内停止")}
+          {createCheckbox("isAreaTouchDown", "エリア内接地", "landing")}
+          {createCheckbox("isInAreaStop", "エリア内停止", "landing")}
         </FormGroup>
       ))}
     </div>

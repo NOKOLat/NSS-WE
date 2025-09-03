@@ -1,4 +1,4 @@
-# NSS  NoKoLAT Scoring System
+# NSS  -NoKoLAT Scoring System-
 
 ## 概要
 NSSは、航空研究会における部内大会での得点管理や競技進行をサポートするWebアプリケーションです。  

@@ -19,10 +19,19 @@ export default function Multicopter(props: Props) {
   const drawerWidth = 240; 
 
   // WebSocket送信関数を取得
-  const { sendJsonMessage } = useWebSocket('ws://localhost:8765', {
+  const { sendJsonMessage, lastJsonMessage } = useWebSocket('ws://localhost:8765', {
     share: true,
     shouldReconnect: () => true,
   });
+
+  // サーバーから受信したparamsを保持
+  const [serverParams, setServerParams] = React.useState<any>({});
+
+  React.useEffect(() => {
+    if (lastJsonMessage && lastJsonMessage.action === "update" && lastJsonMessage.category === "multicopter") {
+      setServerParams(lastJsonMessage.params);
+    }
+  }, [lastJsonMessage]);
 
   const handleTimerClick = (action: string, timestamp: number) => {
     const currentNum2 = getCurrentNum2();
@@ -53,9 +62,14 @@ export default function Multicopter(props: Props) {
         <Stopwatch
           id="timer"
           onClick={handleTimerClick}
+          start={serverParams?.timer?.start}
+          end={serverParams?.timer?.end}
         />
         <React.StrictMode>
-          <Accordions_Multicopter sendJsonMessage={sendJsonMessage}/>  
+          <Accordions_Multicopter
+            sendJsonMessage={sendJsonMessage}
+            serverParams={serverParams}
+          />  
         </React.StrictMode>
       </ResponsiveDrawer>
     </React.Fragment>
