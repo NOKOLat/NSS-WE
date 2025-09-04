@@ -73,7 +73,7 @@ export default function Plane() {
             <Accordions_Plane 
               sendJsonMessage={sendJsonMessage}
               serverParams={serverParams}
-            />  
+            />
           </React.StrictMode>
         </ResponsiveDrawer>
     </React.Fragment>

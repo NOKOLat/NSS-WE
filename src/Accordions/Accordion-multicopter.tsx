@@ -10,7 +10,6 @@ import ArrowForwardIosSharpIcon from '@mui/icons-material/ArrowForwardIosSharp';
 import MuiAccordion, { AccordionProps } from '@mui/material/Accordion';
 import MuiAccordionSummary, {AccordionSummaryProps, accordionSummaryClasses} from '@mui/material/AccordionSummary';
 import MuiAccordionDetails from '@mui/material/AccordionDetails';
-import Counter from '../Components/Counter';
 import Stopwatch from '../Components/Timer'
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button'; // 追加
@@ -54,6 +53,14 @@ const AccordionSummary = styled((props: AccordionSummaryProps) => (
   }),
 }));
 
+const StyledButton = styled(Button)(({ theme }) => ({
+  backgroundColor: '#849cd4ff', // ボタンの背景色
+  color: '#000', // ボタンの文字色
+  '&:hover': {
+    backgroundColor: '#1565c0', // ホバー時の背景色
+  },
+}));
+
 const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
   padding: theme.spacing(2),
   borderTop: '1px solid rgba(0, 0, 0, .125)',
@@ -70,15 +77,100 @@ export default function Accordions_Multicopter({ sendJsonMessage, serverParams }
     setExpanded(newExpanded ? panel : false);
   };
 
+  // チェックボックス用ローカルstate
+  const [localChecked, setLocalChecked] = React.useState<{[key: string]: boolean}>({});
+  // カウンター用ローカルstate
+  const [localCounters, setLocalCounters] = React.useState<{[key: string]: number}>({});
+  // スコア用ローカルstate
+  const [scoreValue, setScoreValue] = React.useState<number | ''>('');
+
+  // 強制更新用のstate
+  const [forceUpdate, setForceUpdate] = React.useState(0);
+
+  // 一時的にローカル操作中のカウンターを記録
+  const [pendingLocalUpdates, setPendingLocalUpdates] = React.useState<{[key: string]: number}>({});
+
+
+
+  // サーバー値が来たらローカル値を上書き（サーバー優先）
+  React.useEffect(() => {
+    if (!serverParams) return;
+
+    // 1秒後にpendingLocalUpdatesをクリア（サーバーからの応答があったとみなす）
+    const timer = setTimeout(() => {
+      setPendingLocalUpdates({});
+    }, 1000);
+
+ 
+
+    // チェックボックスの更新
+    const newChecked: {[key: string]: boolean} = {};
+    newChecked["mainmission_largeSupply_isCollect"] = serverParams.mainmission?.largeSupply?.isCollect ?? false;
+    newChecked["mainmission_largeSupply_isDrropedToBox"] = serverParams.mainmission?.largeSupply?.isDrropedToBox ?? false;
+    newChecked["zaqtransportation_isTransported"] = serverParams.zaqtransportation?.isTransported ?? false;
+    newChecked["zaqtransportation_isLanded"] = serverParams.zaqtransportation?.isLanded ?? false;
+    newChecked["eightTurn_isSuccess"] = serverParams.eightTurn?.isSuccess ?? false;
+    newChecked["eightTurn_isHandsOff"] = serverParams.eightTurn?.isHandsOff ?? false;
+    newChecked["failsafecontrol_failsafe_isHandsOff"] = serverParams.failsafecontrol?.isHandsOff ?? false;
+    newChecked["uniqueMisson_unique_isSuccess"] = serverParams.uniqueMisson?.isSuccess ?? false;
+    newChecked["hovering_isHandsOff"] = serverParams.hovering?.isHandsOff ?? false;
+    newChecked["landing_isAreaTouchDown"] = serverParams.landing?.isAreaTouchDown ?? false;
+    newChecked["landing_isInAreaStop"] = serverParams.landing?.isInAreaStop ?? false;
+    
+    setLocalChecked(newChecked);
+
+    // カウンターの更新（pendingLocalUpdatesがない場合のみ）
+    setLocalCounters(prev => {
+      const newCounters: {[key: string]: number} = { ...prev };
+      const dropareaValue = serverParams.mainmission?.droparea;
+      const boxValue = serverParams.mainmission?.box;
+      
+   
+      
+      // ローカル更新中でない場合のみサーバー値で更新
+      if (dropareaValue !== undefined && !pendingLocalUpdates["mainmission_droparea"]) {
+        newCounters["mainmission_droparea"] = dropareaValue;
+      }
+      if (boxValue !== undefined && !pendingLocalUpdates["mainmission_box"]) {
+        newCounters["mainmission_box"] = boxValue;
+      }
+      
+   
+      return newCounters;
+    });
+
+    setForceUpdate(prev => prev + 1);
+
+    if (serverParams.uniqueMisson?.score !== undefined) {
+      setScoreValue(serverParams.uniqueMisson.score);
+    }
+
+  
+
+    return () => clearTimeout(timer);
+  }, [serverParams, pendingLocalUpdates]);
+
+  // 共通送信関数
+  const sendData = (params: any) => {
+    const category = 'multicopter';
+    const currentNum2 = getCurrentNum2();
+    const adjustedEpoch = getUnixTimestamp() + currentNum2;
+    const jsonData = {
+      action: "update",
+      category,
+      epoch: adjustedEpoch,
+      params
+    };
+    saveJsonToFile(jsonData);
+    sendJsonMessage(jsonData);
+  };
+
   const handleButtonClick = (id: string, event?: any) => {
     let section = 'mainmission';
-    
-    // Section取得
     if (event?.target) {
       const accordion = event.target.closest('.MuiAccordion-root');
       if (accordion?.id) section = accordion.id;
     }
-
     const currentNum2 = getCurrentNum2();
     const value = id.includes('checked');
 
@@ -108,7 +200,8 @@ export default function Accordions_Multicopter({ sendJsonMessage, serverParams }
         repair_timer: 'repair',
         hovering_timer: 'hovering',
         unique_timer: 'uniqueMisson',
-        failsafe_timer: 'failsafecontrol'
+        failsafe_timer: 'failsafecontrol',
+        mainmission_timer: 'mainmission'
       };
       
       const timerSection = Object.keys(timerSections).find(key => id.includes(key));
@@ -139,109 +232,135 @@ export default function Accordions_Multicopter({ sendJsonMessage, serverParams }
     sendData({ [section]: { [counterId]: actionValue } });
   };
 
-  // スコア入力値を保持するstateを追加
-  const [scoreValue, setScoreValue] = React.useState<number | ''>('');
-
-  // 完了ボタンのクリック処理
+  // スコア完了ボタン
   const handleScoreComplete = () => {
-    const category = 'multicopter';
-    const currentNum2 = getCurrentNum2();
-    const adjustedEpoch = getUnixTimestamp() + currentNum2;
-    const value = Number(scoreValue);
+    sendData({ uniqueMisson: { score: Number(scoreValue) } });
+  };
 
-    const jsonData = {
-      action: "update",
-      category: category,
-      epoch: adjustedEpoch,
-      params: {
-        uniqueMisson: {
-          score: value
+  // Counter（ローカル更新中はローカル値を優先）
+  const createCounter = (id: string, label: string, section: string) => {
+    const key = `${section}_${id}`;
+    
+    // ローカル更新中の値があるか確認
+    const pendingValue = pendingLocalUpdates[key];
+    const serverValue = serverParams?.[section]?.[id];
+    const localValue = localCounters[key];
+    
+    // 優先順位：ローカル更新中 > サーバー値 > 既存ローカル値
+    const value = pendingValue !== undefined ? pendingValue : 
+                  serverValue !== undefined ? serverValue : 
+                  localValue ?? 0;
+
+ 
+
+    return (
+      <>
+        
+        <Box sx={{ border: '1px solid #262e40', padding: 1, margin: 1 }}>
+          <Typography>個数：{value}</Typography>
+          <StyledButton onClick={() => {
+            const newValue = value + 1;
+           
+            
+            // ローカル更新をpendingに記録
+            setPendingLocalUpdates(prev => ({
+              ...prev,
+              [key]: newValue,
+            }));
+            
+            // 既存のローカルカウンターも更新
+            setLocalCounters(prev => ({
+              ...prev,
+              [key]: newValue,
+            }));
+            
+            handleButtonClick(`${id}_increment`);
+          }}>+</StyledButton>
+          <StyledButton onClick={() => {
+            const newValue = Math.max(value - 1, 0);
+            
+            
+            // ローカル更新をpendingに記録
+            setPendingLocalUpdates(prev => ({
+              ...prev,
+              [key]: newValue,
+            }));
+            
+            // 既存のローカルカウンターも更新
+            setLocalCounters(prev => ({
+              ...prev,
+              [key]: newValue,
+            }));
+            
+            handleButtonClick(`${id}_decrement`);
+          }}>-</StyledButton>
+        </Box>
+      </>
+    );
+  };
+
+  // チェックボックス（完全にサーバー値優先）
+  const createCheckbox = (id: string, label: string, section: string, nestedKey?: string) => {
+    const key = nestedKey ? `${section}_${nestedKey}_${id}` : `${section}_${id}`;
+    // サーバー値を完全に優先
+    const serverValue = nestedKey
+      ? serverParams?.[section]?.[nestedKey]?.[id]
+      : serverParams?.[section]?.[id];
+    const checked = serverValue !== undefined ? serverValue : localChecked[key] ?? false;
+
+   
+      
+    return (
+      <FormControlLabel
+        control={
+          <Checkbox
+            id={id}
+            sx={{ 
+              color: '#fff',
+              '&.Mui-checked': {
+                color: '#1976d2',
+              },
+            }}
+            checked={checked}
+            onChange={(e) => {
+              setLocalChecked(prev => ({ ...prev, [key]: e.target.checked }));
+              const checkboxId = `${id}_${e.target.checked ? 'checked' : 'unchecked'}`;
+              handleButtonClick(checkboxId, e);
+            }}
+          />
         }
-      }
-    };
-    saveJsonToFile(jsonData);
-    sendJsonMessage(jsonData);
+        label={label}
+      />
+    );
   };
 
-  // 共通送信関数
-const sendData = (params: any) => {
-  const category = 'multicopter';
-  const currentNum2 = getCurrentNum2();
-  const adjustedEpoch = getUnixTimestamp() + currentNum2;
-  
-  const jsonData = {
-    action: "update",
-    category,
-    epoch: adjustedEpoch,
-    params
-  };
-  
-  saveJsonToFile(jsonData);
-  sendJsonMessage(jsonData);
-};
-
-// Checkbox
-const createCheckbox = (id: string, label: string, section: string, nestedKey?: string) => {
-  // 通常は serverParams[section][id]
-  // nestedKeyがあれば serverParams[section][nestedKey][id]
-  let checked = false;
-  if (nestedKey) {
-    checked = serverParams?.[section]?.[nestedKey]?.[id] ?? false;
-  } else {
-    checked = serverParams?.[section]?.[id] ?? false;
-  }
-
-  return (
-    <FormControlLabel
-      control={
-        <Checkbox
-          id={id}
-          sx={{ color: '#fff' }}
-          checked={checked}
-          onChange={(e) => {
-            const checkboxId = `${id}_${e.target.checked ? 'checked' : 'unchecked'}`;
-            handleButtonClick(checkboxId, e);
-          }}
-        />
-      }
-      label={label}
-    />
+  // Accordion
+  const createAccordion = (id: string, panel: string, title: string, children: React.ReactNode) => (
+    <Accordion id={id} expanded={expanded === panel} onChange={handleChange(panel)}>
+      <AccordionSummary aria-controls={`${panel}d-content`} id={id}>
+        <Typography component="span">{title}</Typography>
+      </AccordionSummary>
+      <AccordionDetails>
+        {children}
+      </AccordionDetails>
+    </Accordion>
   );
-};
 
-// Counter
-const createCounter = (id: string, label: string, section: string) => (
-  <>
-    <Box>{label}</Box>
-    <Counter 
-      id={id} 
-      value={serverParams?.[section]?.[id] ?? 0}
-      onClick={(actionId, event) => handleButtonClick(`${id}_${actionId}`, event)}
-    />
-  </>
-);
-
-// Accordion
-const createAccordion = (id: string, panel: string, title: string, children: React.ReactNode) => (
-  <Accordion id={id} expanded={expanded === panel} onChange={handleChange(panel)}>
-    <AccordionSummary aria-controls={`${panel}d-content`} id={id}>
-      <Typography component="span">{title}</Typography>
-    </AccordionSummary>
-    <AccordionDetails>
-      {children}
-    </AccordionDetails>
-  </Accordion>
-);
+  React.useEffect(() => {
+    console.log('Accordion-multicopter サーバー受信:', serverParams);
+  }, [serverParams]);
 
   return (
     <div>
+      
+
       {createAccordion("mainmission", "panel1", "メインミッション", (
         <>
           {createCounter("droparea", "投下エリア", "mainmission")}
           {createCounter("box", "高所運搬", "mainmission")}
           <FormGroup>
             {createCheckbox("isCollect", "救援物資（大）回収成功", "mainmission", "largeSupply")}
-            {createCheckbox("isDroppedToBox", "救援物資（大）運搬成功", "mainmission", "largeSupply")}
+            {createCheckbox("isDrropedToBox", "救援物資（大）運搬成功", "mainmission", "largeSupply")}
           </FormGroup>
           <Stopwatch 
             id="mainmission_timer"
@@ -357,3 +476,4 @@ const createAccordion = (id: string, panel: string, title: string, children: Rea
     </div>
   );
 }
+
