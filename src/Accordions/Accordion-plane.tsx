@@ -157,10 +157,6 @@ export default function Accordions_Plane({ sendJsonMessage, serverParams }: Prop
       newCounters["loop_count"] = serverParams.loop.count;
     }
     
-    console.log('plane newCounters:', newCounters);
-    console.log('serverParams.poleLoop:', serverParams.poleLoop);
-    console.log('serverParams.holizontalLoop:', serverParams.holizontalLoop);
-    console.log('serverParams.mainmission:', serverParams.mainmission);
     
     setLocalCounters(newCounters);
 
@@ -169,7 +165,6 @@ export default function Accordions_Plane({ sendJsonMessage, serverParams }: Prop
 
     setForceUpdate(prev => prev + 1);
 
-    console.log('=== Plane サーバー値更新完了 ===');
   }, [serverParams]);
 
   const handleButtonClick = (id: string, event?: any) => {
@@ -300,7 +295,6 @@ export default function Accordions_Plane({ sendJsonMessage, serverParams }: Prop
           }}>+</StyledButton>
           <StyledButton onClick={() => {
             const newValue = Math.max(value - 1, 0);
-            console.log(`Decrementing ${id} from ${value} to ${newValue}`);
             
             // ローカル更新をpendingに記録
             setPendingLocalUpdates(prev => ({
