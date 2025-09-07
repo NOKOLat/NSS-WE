@@ -19,27 +19,29 @@ export const createButtonClickData = (id: string, num2: number, category: string
 };
 
 // JSONファイルを保存する関数
-export const saveJsonToFile = (data: ButtonClickData): void => {
+export const saveJsonToFile = (data: any) => {
+  // data が文字列ならそのまま、そうでなければ JSON に変換して保存する
+  const payload = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
 
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-  const url = window.URL.createObjectURL(blob);
+  // ...既存のファイル保存ロジックを使用（例: ダウンロードや fs 書き出し）...
+  // 例（ブラウザでダウンロードする実装がある場合）:
+  const blob = new Blob([payload], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `button_${Date.now()}.json`;
+  a.download = 'last_sent.txt';
   a.click();
-  window.URL.revokeObjectURL(url);
+  URL.revokeObjectURL(url);
 };
 
-const handleButtonClick = (id: string, num2: number, category: string) => {
-  const jsonData = createButtonClickData(id, num2, category)
-  saveJsonToFile(jsonData);
-};
-
-
-//JSONファイルを送信する関数
-export const sendJsonToServer = (jsonData: any, sendJsonMessage?: (data: any) => void) => {
-  if (sendJsonMessage) {
-    sendJsonMessage(jsonData);
+export const sendJsonToServer = (ws: WebSocket | any, data: any) => {
+  // 送信も文字列ならそのまま、オブジェクトなら JSON 文字列化
+  const payload = typeof data === 'string' ? data : JSON.stringify(data);
+  if (ws && typeof ws.send === 'function') {
+    ws.send(payload);
+  } else {
+    // もし sendJsonToServer が内部で websocket を作っているならそちらに合わせてください
+    console.warn('sendJsonToServer: websocket not provided or send not a function');
   }
 };
 

@@ -150,94 +150,163 @@ export default function Accordions_Multicopter({ sendJsonMessage, serverParams }
     return () => clearTimeout(timer);
   }, [serverParams, pendingLocalUpdates]);
 
-  // 共通送信関数
-  const sendData = (params: any) => {
-    const category = 'multicopter';
-    const currentNum2 = getCurrentNum2();
-    const adjustedEpoch = getUnixTimestamp() + currentNum2;
-    const jsonData = {
-      action: "update",
-      category,
-      epoch: adjustedEpoch,
-      params
-    };
-    saveJsonToFile(jsonData);
-    sendJsonMessage(jsonData);
+  // map button id/section/action -> 送信する名称（multicopter用）
+  const mapButtonName = (section: string, id: string, action?: string) => {
+    // 優先的に action を使う増減系は action を考慮
+    if (section === 'mainmission') {
+      if (id === 'droparea') return action === 'increment' ? 'plusButton_multicopter' : 'minusButton_multicopter';
+      if (id === 'box') return action === 'increment' ? 'plusButton_2_multicopter' : 'minusButton_2_multicopter';
+      if (id === 'finish' || id === 'mainmission_finish') return 'mainmission_finish_multicopter';
+      // 大物資関連はチェック処理で別ハンドリングすることもあるが名前だけ返す
+      if (id === 'isCollect') return 'largeSupplie_isCollected';
+      if (id === 'isDrropedToBox' || id === 'isDroppedToBox') return 'largeSupplie_isdroppedBox';
+    }
+
+    if (section === 'zaqtransportation') {
+      if (id === 'isTransported') return 'ZAQ_isTransported';
+      if (id === 'isLanded') return 'ZAQ_isLanded';
+    }
+
+    if (section === 'eightTurn') {
+      if (id === 'isHandsOff') return 'eightTurn_isHandsoff_multicopter';
+      if (id === 'isSuccess') return 'eightTurn_isSuccess_multicopter';
+    }
+
+    if (section === 'failsafecontrol') {
+      if (id.includes('start') || id.includes('timer')) return 'failsafeControll_start';
+      if (id.includes('isHandsOff')) return 'failsafeControll_isHandsoff';
+    }
+
+    if (section === 'hovering') {
+      if (id.includes('start') || id.includes('timer')) return 'hovering_start';
+      if (id.includes('isHandsOff')) return 'hovering_isHandsoff';
+    }
+
+    if (section === 'landing') {
+      if (id === 'landing_button' || id === 'landing' || id === 'return') return 'landing_button_multicopter';
+      if (id.includes('isInAreaTouchDown') || id.includes('isAreaTouchDown') || id === 'isInAreaTouchDown_multicopter') return 'isInAreaTouchDown_multicopter';
+      if (id.includes('isInVertiport') || id === 'isInVertiport') return 'isInVertiport';
+    }
+
+    // デフォルト： section_id_action の形式で返す
+    return `${section}_${id}${action ? `_${action}` : ''}`;
   };
 
-  const handleButtonClick = (id: string, event?: any) => {
-    let section = 'mainmission';
-    if (event?.target) {
-      const accordion = event.target.closest('.MuiAccordion-root');
-      if (accordion?.id) section = accordion.id;
-    }
-    const currentNum2 = getCurrentNum2();
-    const value = id.includes('checked');
-
-    // 特殊ケースのマッピング
-    const specialCases = {
-      'isAreaTouchDown': () => sendData({ landing: { isAreaTouchDown: value } }),
-      'isInAreaStop': () => sendData({ landing: { isInAreaStop: value } }),
-      'unique_isSuccess': () => sendData({ uniqueMisson: { isSuccess: value } }),
-      'isCollect': () => sendData({ mainmission: { largeSupply: { isCollect: value } } }),
-      'isDrropedToBox': () => sendData({ mainmission: { largeSupply: { isDrropedToBox: value } } }),
-      'isTransported': () => sendData({ zaqtransportation: { isTransported: value } }),
-      'isLanded': () => sendData({ zaqtransportation: { isLanded: value } }),
-      'failsafe_isHandsOff': () => sendData({ failsafecontrol: { isHandsOff: value } }),
-    };
-
-    // 特殊ケース処理
-    for (const [key, handler] of Object.entries(specialCases)) {
-      if (id.includes(key)) return handler();
-    }
-
-    // Timer処理
-    if (id.includes('timer') && (id.includes('start') || id.includes('stop'))) {
-      const timeKey = id.includes('start') ? 'start' : 'end';
-      const adjustedTimestamp = Date.now() + currentNum2;
-      
-      const timerSections = {
-        repair_timer: 'repair',
-        hovering_timer: 'hovering',
-        unique_timer: 'uniqueMisson',
-        failsafe_timer: 'failsafecontrol',
-        mainmission_timer: 'mainmission'
-      };
-      
-      const timerSection = Object.keys(timerSections).find(key => id.includes(key));
-      const targetSection = timerSection ? timerSections[timerSection] : section;
-      
-      return sendData({ [targetSection]: { epoch: { [timeKey]: adjustedTimestamp } } });
-    }
-
-    // isHandsOff/isSuccess処理（section依存）
-    if (id.includes('isHandsOff')) {
-      const targetSection = section === 'hovering' ? 'hovering' : 'eightTurn';
-      return sendData({ [targetSection]: { isHandsOff: value } });
-    }
-    
-    if (id.includes('isSuccess')) {
-      return sendData({ eightTurn: { isSuccess: value } });
-    }
-
-    // 通常処理
-    const [counterId, action] = id.split('_');
-    let actionValue;
-    if (action === 'increment') actionValue = 1;
-    else if (action === 'decrement') actionValue = -1;
-    else if (action === 'checked') actionValue = true;
-    else if (action === 'unchecked') actionValue = false;
-    else actionValue = 1;
-
-    sendData({ [section]: { [counterId]: actionValue } });
+  // 共通送信関数 — プレーン文字列で送信するように変更
+  const sendData = (buttonName: string) => {
+    // ローカル保存はプレーン文字列で
+    saveJsonToFile(buttonName);
+    // 実際の送信（受け取り側がプレーン文字列を期待する）
+    sendJsonMessage(buttonName);
   };
 
-  // スコア完了ボタン
+  // handleButtonClick: 第3引数で section を明示できるように変更
+  const handleButtonClick = (id: string, event?: any, sectionOverride?: string) => {
+    // sectionOverride があれば優先、それ以外は event から取得し、なければ mainmission をデフォルト
+    let section = sectionOverride ?? 'mainmission';
+    if (!sectionOverride) {
+      if (event?.target) {
+        const accordion = event.target.closest('.MuiAccordion-root');
+        if (accordion?.id) section = accordion.id;
+      }
+    }
+
+    // id を最後のパートを action (start/stop/increment/...) として正しく分割する
+    const parts = id.split('_');
+    const action = parts.length > 1 ? parts[parts.length - 1] : '';
+    const counterId = parts.length > 1 ? parts.slice(0, -1).join('_') : parts[0];
+    const currentNum2 = getCurrentNum2();
+
+    // Timer処理：action が start/stop のとき、counterId に timer を含むなら mapButtonName を使う
+    if ((action === 'start' || action === 'stop') && counterId.toLowerCase().includes('timer')) {
+      const name = mapButtonName(section, counterId, action) || `${section}_${counterId}_${action}`;
+      return sendData(name);
+    }
+ 
+     // 特殊ケース（チェック系）は名前だけ送る
+     const value = id.includes('checked');
+ 
+     const specialCases = {
+       'isAreaTouchDown': () => mapButtonName('landing','isAreaTouchDown'),
+       'isInAreaStop': () => mapButtonName('landing','isInAreaStop'),
+       'unique_isSuccess': () => mapButtonName('uniqueMisson','isSuccess'),
+       'isCollect': () => mapButtonName('mainmission','isCollect'),
+       'isDrropedToBox': () => mapButtonName('mainmission','isDrropedToBox'),
+       'isTransported': () => mapButtonName('zaqtransportation','isTransported'),
+       'isLanded': () => mapButtonName('zaqtransportation','isLanded'),
+       'failsafe_isHandsOff': () => mapButtonName('failsafecontrol','isHandsOff'),
+     };
+ 
+     for (const key of Object.keys(specialCases)) {
+       if (id.includes(key)) {
+         const name = (specialCases as any)[key]();
+         return sendData(name ?? `${section}_${id}`);
+       }
+     }
+ 
+     // isHandsOff / isSuccess のセクション依存処理（名前のみ送信）
+     if (id.includes('isHandsOff')) {
+       const targetSection = section === 'hovering' ? 'hovering' : 'eightTurn';
+       const name = mapButtonName(targetSection, 'isHandsOff') || `${targetSection}_isHandsOff`;
+       return sendData(name);
+     }
+     if (id.includes('isSuccess')) {
+       const name = mapButtonName('eightTurn', 'isSuccess') || 'eightTurn_isSuccess';
+       return sendData(name);
+     }
+ 
+     // 通常処理：増減/チェックのボタン名だけ送る
+     const name = mapButtonName(section, counterId, action) || `${section}_${counterId}${action ? `_${action}` : ''}`;
+     return sendData(name);
+   };
+
+  // Stopwatch イベントを正規化して handleButtonClick に渡すラッパー
+  const stopwatchOnClickWrapper = (timerId: string) => (...args: any[]) => {
+    // 受け取りパターンに柔軟に対応
+    // パターンA: (actionId: string, event?: any)
+    // パターンB: ({ action: string, timestamp?: number, event?: any })
+    // パターンC: (actionId: string, timestamp?: number)
+    let actionId: string | undefined;
+    let event: any = undefined;
+
+    if (typeof args[0] === 'string') {
+      actionId = args[0];
+      event = args[1];
+    } else if (args[0] && typeof args[0].action === 'string') {
+      actionId = args[0].action;
+      event = args[0].event ?? undefined;
+    } else {
+      return;
+    }
+
+    if (!actionId) return;
+
+    // timerId からセクションを推定（failsafe 等を正しくマッピングするため）
+    const inferSectionFromTimerId = (tid: string) => {
+      const t = tid.toLowerCase();
+      if (t.includes('failsafe')) return 'failsafecontrol';
+      if (t.includes('hovering')) return 'hovering';
+      if (t.includes('unique')) return 'uniqueMisson';
+      if (t.includes('mainmission')) return 'mainmission';
+      if (t.includes('repair')) return 'repair';
+      if (t.includes('gliding')) return 'gliding';
+      if (t.includes('zaq') || t.includes('zaqtransportation')) return 'zaqtransportation';
+      // 未推定の場合は undefined にして event から判定させる
+      return undefined;
+    };
+
+    const inferredSection = inferSectionFromTimerId(timerId);
+
+    handleButtonClick(`${timerId}_${actionId}`, event, inferredSection);
+  };
+
+  // スコア完了ボタン — ボタン名のみ送信するように変更
   const handleScoreComplete = () => {
-    sendData({ uniqueMisson: { score: Number(scoreValue) } });
+    // 送信する名前はプロジェクト側の仕様に合わせて調整できます
+    const name = 'uniqueMisson_score'; 
+    sendData(name);
   };
-
-  // Counter（ローカル更新中はローカル値を優先）
+  // Counter（説明文を削除し，数値を中央表示）
   const createCounter = (id: string, label: string, section: string) => {
     const key = `${section}_${id}`;
     
@@ -251,49 +320,31 @@ export default function Accordions_Multicopter({ sendJsonMessage, serverParams }
                   serverValue !== undefined ? serverValue : 
                   localValue ?? 0;
 
- 
-
     return (
       <>
-        
-        <Box sx={{ border: '1px solid #262e40', padding: 1, margin: 1 }}>
-          <Typography>個数：{value}</Typography>
-          <StyledButton onClick={() => {
-            const newValue = value + 1;
-           
-            
-            // ローカル更新をpendingに記録
-            setPendingLocalUpdates(prev => ({
-              ...prev,
-              [key]: newValue,
-            }));
-            
-            // 既存のローカルカウンターも更新
-            setLocalCounters(prev => ({
-              ...prev,
-              [key]: newValue,
-            }));
-            
-            handleButtonClick(`${id}_increment`);
-          }}>+</StyledButton>
-          <StyledButton onClick={() => {
-            const newValue = Math.max(value - 1, 0);
-            
-            
-            // ローカル更新をpendingに記録
-            setPendingLocalUpdates(prev => ({
-              ...prev,
-              [key]: newValue,
-            }));
-            
-            // 既存のローカルカウンターも更新
-            setLocalCounters(prev => ({
-              ...prev,
-              [key]: newValue,
-            }));
-            
-            handleButtonClick(`${id}_decrement`);
-          }}>-</StyledButton>
+        <Box sx={{ border: '1px solid #e0e0e0', padding: 1, margin: 1, borderRadius: 1 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 0.5 }}>
+            <Typography variant="subtitle2">{label}</Typography>
+          </Box>
+
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 1 }}>
+            <Typography variant="h5" sx={{ textAlign: 'center' }}>{value}</Typography>
+          </Box>
+
+          <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
+            <StyledButton onClick={(e) => {
+              const newValue = value + 1;
+              setPendingLocalUpdates(prev => ({ ...prev, [key]: newValue }));
+              setLocalCounters(prev => ({ ...prev, [key]: newValue }));
+              handleButtonClick(`${id}_increment`, e);
+            }}>+</StyledButton>
+            <StyledButton onClick={(e) => {
+              const newValue = Math.max(value - 1, 0);
+              setPendingLocalUpdates(prev => ({ ...prev, [key]: newValue }));
+              setLocalCounters(prev => ({ ...prev, [key]: newValue }));
+              handleButtonClick(`${id}_decrement`, e);
+            }}>-</StyledButton>
+          </Box>
         </Box>
       </>
     );
@@ -356,18 +407,20 @@ export default function Accordions_Multicopter({ sendJsonMessage, serverParams }
 
       {createAccordion("mainmission", "panel1", "メインミッション", (
         <>
+          <Box sx={{ mt: 1 }}>
+            <StyledButton
+              variant="contained"
+              onClick={(e) => handleButtonClick('finish', e)}
+            >
+              完了
+            </StyledButton>
+          </Box>
           {createCounter("droparea", "投下エリア", "mainmission")}
-          {createCounter("box", "高所運搬", "mainmission")}
+          {createCounter("box", "箱", "mainmission")}
           <FormGroup>
-            {createCheckbox("isCollect", "救援物資（大）回収成功", "mainmission", "largeSupply")}
-            {createCheckbox("isDrropedToBox", "救援物資（大）運搬成功", "mainmission", "largeSupply")}
+            {createCheckbox("isCollect", "大物資回収成功", "mainmission")}
+            {createCheckbox("isDrropedToBox", "大物資箱投下成功", "mainmission")}
           </FormGroup>
-          <Stopwatch 
-            id="mainmission_timer"
-            start={serverParams?.mainmission?.epoch?.start}
-            end={serverParams?.mainmission?.epoch?.end}
-            onClick={(actionId, event) => handleButtonClick(`mainmission_timer_${actionId}`, event)}
-          />
         </>
       ))}
 
@@ -387,11 +440,12 @@ export default function Accordions_Multicopter({ sendJsonMessage, serverParams }
 
       {createAccordion("failsafecontrol", "panel4", "耐故障制御", (
         <>
+
           <Stopwatch 
             id="failsafe_timer"
             start={serverParams?.failsafecontrol?.epoch?.start}
             end={serverParams?.failsafecontrol?.epoch?.end}
-            onClick={(actionId, event) => handleButtonClick(`failsafe_timer_${actionId}`, event)}
+            onClick={(actionId, event) => handleButtonClick(`failsafe_timer_${actionId}`, event, 'failsafecontrol')}
           />
           <FormGroup>
             {createCheckbox("failsafe_isHandsOff", "ハンズオフ飛行", "failsafecontrol")}
@@ -405,7 +459,7 @@ export default function Accordions_Multicopter({ sendJsonMessage, serverParams }
             id="unique_timer"
             start={serverParams?.uniqueMisson?.epoch?.start}
             end={serverParams?.uniqueMisson?.epoch?.end}
-            onClick={(actionId, event) => handleButtonClick(`unique_timer_${actionId}`, event)}
+            onClick={(actionId, event) => handleButtonClick(`unique_timer_${actionId}`, event, 'uniqueMisson')}
           />
           <FormGroup>
             {createCheckbox("unique_isSuccess", "成功", "uniqueMisson")}
@@ -450,7 +504,7 @@ export default function Accordions_Multicopter({ sendJsonMessage, serverParams }
             id="hovering_timer"
             start={serverParams?.hovering?.epoch?.start}
             end={serverParams?.hovering?.epoch?.end}
-            onClick={(actionId, event) => handleButtonClick(`hovering_timer_${actionId}`, event)}
+            onClick={(actionId, event) => handleButtonClick(`hovering_timer_${actionId}`, event, 'hovering')}
           />
           <FormGroup>
             {createCheckbox("isHandsOff", "ハンズオフ飛行", "hovering")}
@@ -461,16 +515,18 @@ export default function Accordions_Multicopter({ sendJsonMessage, serverParams }
       {createAccordion("repair", "panel7", "修理", (
         <Stopwatch 
           id="repair_timer"
+          // 修理はサーバーへ送信しないため onClick を no-op にする
           start={serverParams?.repair?.epoch?.start}
           end={serverParams?.repair?.epoch?.end}
-          onClick={(actionId, event) => handleButtonClick(`repair_timer_${actionId}`, event)}
+          onClick={(..._args: any[]) => { /* no-op: 修理タイマーは送信しない */ }}
         />
       ))}
 
       {createAccordion("landing", "panel8", "競技終了", (
         <FormGroup>
-          {createCheckbox("isAreaTouchDown", "エリア内接地", "landing")}
-          {createCheckbox("isInAreaStop", "エリア内停止", "landing")}
+          {createCheckbox("isAreaTouchDown", "着陸成功", "landing")}
+          {createCheckbox("isInAreaStop", "パーティーポート内着陸成功", "landing")}
+          {createCheckbox("landing_button", "帰還", "landing")}
         </FormGroup>
       ))}
     </div>

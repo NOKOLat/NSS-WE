@@ -122,14 +122,22 @@ function Stopwatch({ id, onClick, start, end }: StopwatchProps) {
         <Stack direction={'row'} spacing={1} sx={{ justifyContent: 'center', alignItems: 'center' }}>
           {isRunning ? (
             <StopButton
-              onClick={handleStop}
+              onClick={() => {
+                const ts = Date.now();
+                if (typeof onClick === 'function') onClick('stop', ts);
+                handleStop();
+              }}
               variant='outlined'
             >
               Stop
             </StopButton>
           ) : (
             <StartButton
-              onClick={handleStart}
+              onClick={() => {
+                const ts = Date.now();
+                if (typeof onClick === 'function') onClick('start', ts);
+                handleStart();
+              }}
               variant='outlined'
             >
               Start

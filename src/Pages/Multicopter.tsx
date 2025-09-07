@@ -18,8 +18,8 @@ export default function Multicopter(props: Props) {
   const navigate = useNavigate();
   const drawerWidth = 240; 
 
-  // WebSocket送信関数を取得
-  const { sendJsonMessage, lastJsonMessage } = useWebSocket('ws://localhost:8765', {
+  // WebSocket送信関数を取得（プレーン文字列送信用の sendMessage を含む）
+  const { sendJsonMessage, sendMessage, lastJsonMessage, lastMessage } = useWebSocket('ws://localhost:8765', {
     share: true,
     shouldReconnect: () => true,
   });
@@ -33,24 +33,24 @@ export default function Multicopter(props: Props) {
     }
   }, [lastJsonMessage]);
 
-  const handleTimerClick = (action: string, timestamp: number) => {
-    const currentNum2 = getCurrentNum2();
-    const actionKey = action === 'stop' ? 'end' : action;
-    const adjustedEpoch = getUnixTimestamp() + currentNum2;
-    const adjustedTimestamp = timestamp + currentNum2;
+  // Start/Stop 押下時にプレーン文字列を送信（JSONは生成しない）
+  const handleTimerClick = (action: string, timestamp?: number) => {
+    const buttonName = action === 'stop' ? 'gameFinish_Button' : 'gameStart_Button';
+    saveJsonToFile(buttonName);
+    if (typeof sendMessage === 'function') {
+      sendMessage(buttonName);
+    } else if (typeof sendJsonMessage === 'function') {
+      sendJsonMessage(buttonName as any);
+    }
+  };
 
-    const jsonData = {
-      action: "update",
-      category: "multicopter",
-      epoch: adjustedEpoch,
-      params: {
-        timer: {
-          [actionKey]: adjustedTimestamp
-        }
-      }
-    };
-    saveJsonToFile(jsonData);
-    sendJsonToServer(jsonData, sendJsonMessage); 
+  // Stopwatch の onClick 引数を安全に受け取り、start/stop を検出して送信する wrapper
+  const stopwatchOnClickWrapper = (...args: any[]) => {
+    if (typeof args[0] === 'string' && (args[0] === 'start' || args[0] === 'stop')) {
+      handleTimerClick(args[0], typeof args[1] === 'number' ? args[1] : Date.now());
+    } else if (args[0] && typeof args[0].action === 'string' && (args[0].action === 'start' || args[0].action === 'stop')) {
+      handleTimerClick(args[0].action, args[0].timestamp ?? Date.now());
+    }
   };
 
   return (
@@ -61,15 +61,16 @@ export default function Multicopter(props: Props) {
         <Typography variant="body1">得点</Typography>
         <Stopwatch
           id="timer"
-          onClick={handleTimerClick}
+          onClick={(...args: any[]) => stopwatchOnClickWrapper(...args)}
           start={serverParams?.timer?.start}
           end={serverParams?.timer?.end}
         />
         <React.StrictMode>
-          <Accordions_Multicopter
+          <Accordions_Multicopter 
             sendJsonMessage={sendJsonMessage}
+            sendMessage={sendMessage}
             serverParams={serverParams}
-          />  
+          />
         </React.StrictMode>
       </ResponsiveDrawer>
     </React.Fragment>
