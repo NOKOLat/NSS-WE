@@ -307,9 +307,19 @@ export default function Accordions_Plane({ sendJsonMessage, sendMessage, serverP
             }}
             checked={checked}
             onChange={(e) => {
+              // ローカル状態更新
               setLocalChecked(prev => ({ ...prev, [key]: e.target.checked }));
+
+              // landing の「帰還」だけはプレーンなボタン名を直接送る（landing_button）
+              if (section === 'landing' && id === 'landing_button') {
+                // 送信はプレーン文字列 "landing_button"
+                sendData('landing_button');
+                return;
+              }
+
+              // 標準のチェックボックス送信（例: isAreaTouchDown_checked / unchecked）
               const checkboxId = `${id}_${e.target.checked ? 'checked' : 'unchecked'}`;
-              handleButtonClick(checkboxId, e);
+              handleButtonClick(checkboxId, e, section);
             }}
           />
         }
@@ -533,12 +543,12 @@ export default function Accordions_Plane({ sendJsonMessage, sendMessage, serverP
         <>
         <FormGroup>
          　 {createCheckbox("landing_button", "帰還", "landing")}
-            {createCheckbox("isAreaTouchDown", "エリア内接地", "landing")}
-             {createCheckbox("isInAreaStop", "エリア内静止", "landing")}
-             {createCheckbox("isRunwayLanding", "滑走路内着陸", "landing")}
-           </FormGroup>
-         </>
-       ))}
+             {createCheckbox("isAreaTouchDown", "エリア内接地", "landing")}
+              {createCheckbox("isInAreaStop", "エリア内静止", "landing")}
+              {createCheckbox("isRunwayLanding", "滑走路内着陸", "landing")}
+            </FormGroup>
+          </>
+        ))}
     </div>
   );
 }

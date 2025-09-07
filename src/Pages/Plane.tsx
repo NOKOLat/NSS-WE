@@ -35,7 +35,7 @@ class ErrorBoundary extends React.Component<{children?: React.ReactNode}, { hasE
 
 export default function Plane() {
   // WebSocket送信関数を取得（プレーン文字列送信用の sendMessage を含む）
-  const { sendJsonMessage, sendMessage, lastJsonMessage, lastMessage, readyState } = useWebSocket('ws://localhost:8765', {
+  const { sendJsonMessage, sendMessage, lastJsonMessage, lastMessage, readyState } = useWebSocket('ws://192.168.10.164:8765', {
      share: true,
      shouldReconnect: () => true,
    });

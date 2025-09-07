@@ -19,7 +19,7 @@ export default function Multicopter(props: Props) {
   const drawerWidth = 240; 
 
   // WebSocket送信関数を取得（プレーン文字列送信用の sendMessage を含む）
-  const { sendJsonMessage, sendMessage, lastJsonMessage, lastMessage } = useWebSocket('ws://localhost:8765', {
+  const { sendJsonMessage, sendMessage, lastJsonMessage, lastMessage } = useWebSocket('ws://192.168.10.164:8765', {
     share: true,
     shouldReconnect: () => true,
   });

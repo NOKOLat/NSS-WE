@@ -407,7 +407,14 @@ export default function Accordions_Multicopter({ sendJsonMessage, serverParams }
 
       {createAccordion("mainmission", "panel1", "メインミッション", (
         <>
-          <Box sx={{ mt: 1 }}>
+         
+          {createCounter("droparea", "投下エリア", "mainmission")}
+          {createCounter("box", "箱", "mainmission")}
+          <FormGroup>
+            {createCheckbox("isCollect", "大物資回収成功", "mainmission")}
+            {createCheckbox("isDrropedToBox", "大物資箱投下成功", "mainmission")}
+          </FormGroup>
+           <Box sx={{ mt: 1 }}>
             <StyledButton
               variant="contained"
               onClick={(e) => handleButtonClick('finish', e)}
@@ -415,12 +422,6 @@ export default function Accordions_Multicopter({ sendJsonMessage, serverParams }
               完了
             </StyledButton>
           </Box>
-          {createCounter("droparea", "投下エリア", "mainmission")}
-          {createCounter("box", "箱", "mainmission")}
-          <FormGroup>
-            {createCheckbox("isCollect", "大物資回収成功", "mainmission")}
-            {createCheckbox("isDrropedToBox", "大物資箱投下成功", "mainmission")}
-          </FormGroup>
         </>
       ))}
 
