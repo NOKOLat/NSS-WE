@@ -4,7 +4,7 @@ import Stopwatch from '../Components/Timer';
 import '../App.css';
 import Accordions_Multicopter from '../Accordions/Accordion-multicopter';
 import Typography from '@mui/material/Typography';
-import { saveJsonToFile ,sendJsonToServer} from '../Data/handleButtonClick';
+import { sendJsonToServer} from '../Data/handleButtonClick';
 import { getCurrentNum2, getUnixTimestamp } from '../Data/time';
 import { useNavigate } from "react-router-dom";
 import useWebSocket from 'react-use-websocket'; 
@@ -19,7 +19,7 @@ export default function Multicopter(props: Props) {
   const drawerWidth = 240; 
 
   // WebSocket送信関数を取得（送信状態確認用 readyState も取得）
-  const { sendJsonMessage, sendMessage, lastJsonMessage, lastMessage, readyState } = useWebSocket('ws://192.168.10.164:8765', {
+  const { sendJsonMessage, sendMessage, lastJsonMessage, lastMessage, readyState } = useWebSocket('ws://localhost:8765', {
     share: true,
     shouldReconnect: () => true,
   });
@@ -39,7 +39,7 @@ export default function Multicopter(props: Props) {
 
   // 共通送信関数（readyState ガード＋ログ＋デデュープ）
   const sendData = (buttonName: string) => {
-    try { saveJsonToFile(buttonName); } catch (e) { console.warn('saveJsonToFile failed', e); }
+    
 
     // 重複抑止
     const now = Date.now();

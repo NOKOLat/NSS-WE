@@ -4,7 +4,7 @@ import Stopwatch from '../Components/Timer';
 import '../App.css';
 import Accordions_Plane from '../Accordions/Accordion-plane';
 import Typography from '@mui/material/Typography';
-import { saveJsonToFile ,sendJsonToServer} from '../Data/handleButtonClick';
+import {  sendJsonToServer} from '../Data/handleButtonClick';
 import { getCurrentNum2, getUnixTimestamp } from '../Data/time';
 import useWebSocket from 'react-use-websocket';
 
@@ -35,7 +35,7 @@ class ErrorBoundary extends React.Component<{children?: React.ReactNode}, { hasE
 
 export default function Plane() {
   // WebSocket送信関数を取得（プレーン文字列送信用の sendMessage を含む）
-  const { sendJsonMessage, sendMessage, lastJsonMessage, lastMessage, readyState } = useWebSocket('ws://8765', {
+  const { sendJsonMessage, sendMessage, lastJsonMessage, lastMessage, readyState } = useWebSocket('ws://localhost:8765', {
      share: true,
      shouldReconnect: () => true,
    });
@@ -55,7 +55,7 @@ export default function Plane() {
      const buttonName = action === 'stop' ? 'gameFinish_Button' : 'gameStart_Button';
      // ログを出して送信の有無を確認
      console.log('handleTimerClick called', { action, timestamp, buttonName, sendMessageType: typeof sendMessage, readyState });
-     saveJsonToFile(buttonName);
+   
      if (typeof sendMessage === 'function') {
        try {
          sendMessage(buttonName);

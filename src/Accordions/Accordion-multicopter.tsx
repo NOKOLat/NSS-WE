@@ -13,7 +13,7 @@ import MuiAccordionDetails from '@mui/material/AccordionDetails';
 import Stopwatch from '../Components/Timer'
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button'; // 追加
-import { createButtonClickData, saveJsonToFile,sendJsonToServer } from '../Data/handleButtonClick.tsx';
+import { createButtonClickData, sendJsonToServer } from '../Data/handleButtonClick.tsx';
 import { getCurrentNum2, getUnixTimestamp } from '../Data/time';
 
 const Accordion = styled((props: AccordionProps) => (
@@ -194,12 +194,7 @@ export default function Accordions_Multicopter({ sendJsonMessage, serverParams }
 
   // 共通送信関数（ログ・ガード付き）
   const sendData = (buttonName: string) => {
-    // 履歴保存（ローカル）
-    try {
-      saveJsonToFile(buttonName);
-    } catch (e) {
-      console.warn('saveJsonToFile failed', e);
-    }
+   
 
     // 送信関数の存在チェック
     if (typeof sendJsonMessage !== 'function') {

@@ -13,7 +13,7 @@ import MuiAccordionSummary, {AccordionSummaryProps,accordionSummaryClasses,} fro
 import MuiAccordionDetails from '@mui/material/AccordionDetails';
 import Counter from '../Components/Counter.tsx'
 import Stopwatch from '../Components/Timer.tsx'  // 追加：Stopwatch を復活
-import { createButtonClickData, saveJsonToFile,sendJsonToServer } from '../Data/handleButtonClick.tsx';
+import { createButtonClickData,sendJsonToServer } from '../Data/handleButtonClick.tsx';
 import { getCurrentNum2, getUnixTimestamp } from '../Data/time';
 
 const Accordion = styled((props: AccordionProps) => (
@@ -276,7 +276,6 @@ export default function Accordions_Plane(props: Props) {
 
   // 共通送信関数 — プレーン文字列で送信するように変更（引用符なし）
   const sendData = (buttonName: string) => {
-    saveJsonToFile(buttonName);
     // 優先して sendMessage を使う（プレーン文字列送信用）、なければ sendJsonMessage を呼ぶ
     if (typeof sendMessage === 'function') {
       sendMessage(buttonName);
