@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Button, Stack, Box } from '@mui/material'
 import { styled } from '@mui/material/styles';
+import * as React from 'react';
 
 const StartButton = styled(Button)(({ theme }) => ({
   backgroundColor: '#2a8d88', // ボタンの背景色
@@ -12,14 +13,15 @@ const StopButton = styled(Button)(({ theme }) => ({
   color: '#fff', // ボタンの文字色
 }));
 
-interface StopwatchProps {
-  id: string;
-  onClick: (action: string, timestamp: number) => void;
+type Props = {
+  id?: string;
   start?: number;
   end?: number;
+  onClick?: (action: 'start'|'stop'|'reset', timestamp?: number) => void;
 }
 
-function Stopwatch({ id, onClick, start, end }: StopwatchProps) {
+export default function Stopwatch(props: Props) {
+  const { id, start, end, onClick } = props;
   const [elapsedTime, setElapsedTime] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   const intervalRef = useRef<number | null>(null);
@@ -75,19 +77,39 @@ function Stopwatch({ id, onClick, start, end }: StopwatchProps) {
     };
   }, [start, end, isRunning]);
 
+  React.useEffect(() => {
+    console.log(`Timer(${id}) mounted, start=${start}, end=${end}`);
+  }, [id, start, end]);
+
   function handleStart() {
-    if (start) {
-      onClick('start', getUnixTimestamp() + getCurrentNum2());
+    const ts = getUnixTimestamp() + getCurrentNum2();
+    console.log(`Timer(${id}) handleStart called, startProp=${!!start}, ts=${ts}`);
+
+    // 親が onClick を渡していれば必ずコール（ローカル動作は維持）
+    if (typeof onClick === 'function') {
+      console.log(`Timer(${id}) calling props.onClick('start')`);
+      try { onClick('start', ts); } catch (e) { console.error('props.onClick threw', e); }
     } else {
-      localStartTimeRef.current = getUnixTimestamp() + getCurrentNum2();
+      console.warn(`Timer(${id}) props.onClick is not a function`);
+    }
+    if (!start) {
+      localStartTimeRef.current = ts;
       setIsRunning(true);
     }
   }
 
   function handleStop() {
-    if (start) {
-      onClick('stop', getUnixTimestamp() + getCurrentNum2());
+    const ts = getUnixTimestamp() + getCurrentNum2();
+    console.log(`Timer(${id}) handleStop called, startProp=${!!start}, ts=${ts}`);
+
+    // 親が onClick を渡していれば必ずコール（ローカル動作は維持）
+    if (typeof onClick === 'function') {
+      console.log(`Timer(${id}) calling props.onClick('stop')`);
+      try { onClick('stop', ts); } catch (e) { console.error('props.onClick threw', e); }
     } else {
+      console.warn(`Timer(${id}) props.onClick is not a function`);
+    }
+    if (!start) {
       if (intervalRef.current !== null) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
@@ -95,11 +117,19 @@ function Stopwatch({ id, onClick, start, end }: StopwatchProps) {
       setIsRunning(false);
     }
   }
-  
+
   function handleReset() {
-    if (start) {
-      onClick('reset', getUnixTimestamp() + getCurrentNum2());
+    const ts = getUnixTimestamp() + getCurrentNum2();
+    console.log(`Timer(${id}) handleReset called, startProp=${!!start}, ts=${ts}`);
+
+    // 親が onClick を渡していれば必ずコール（ローカル動作は維持）
+    if (typeof onClick === 'function') {
+      console.log(`Timer(${id}) calling props.onClick('reset')`);
+      try { onClick('reset', ts); } catch (e) { console.error('props.onClick threw', e); }
     } else {
+      console.warn(`Timer(${id}) props.onClick is not a function`);
+    }
+    if (!start) {
       if (intervalRef.current !== null) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
@@ -110,6 +140,7 @@ function Stopwatch({ id, onClick, start, end }: StopwatchProps) {
     }
   }
 
+  // ボタンは handleStart/handleStop を呼ぶだけ（props.onClick は上で一度だけ呼ぶ）
   const milliseconds = `0${Math.floor(elapsedTime % 1000 / 10)}`.slice(-2);
   const seconds = `0${Math.floor(elapsedTime / 1000) % 60}`.slice(-2);
   const minutes = `0${Math.floor(elapsedTime / 60000) % 60}`.slice(-2);
@@ -123,8 +154,7 @@ function Stopwatch({ id, onClick, start, end }: StopwatchProps) {
           {isRunning ? (
             <StopButton
               onClick={() => {
-                const ts = Date.now();
-                if (typeof onClick === 'function') onClick('stop', ts);
+                console.log(`Timer(${id}) Stop button clicked`);
                 handleStop();
               }}
               variant='outlined'
@@ -134,8 +164,7 @@ function Stopwatch({ id, onClick, start, end }: StopwatchProps) {
           ) : (
             <StartButton
               onClick={() => {
-                const ts = Date.now();
-                if (typeof onClick === 'function') onClick('start', ts);
+                console.log(`Timer(${id}) Start button clicked`);
                 handleStart();
               }}
               variant='outlined'
@@ -148,5 +177,3 @@ function Stopwatch({ id, onClick, start, end }: StopwatchProps) {
     </Box>
   );
 }
-
-export default Stopwatch;

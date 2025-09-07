@@ -192,12 +192,30 @@ export default function Accordions_Multicopter({ sendJsonMessage, serverParams }
     return `${section}_${id}${action ? `_${action}` : ''}`;
   };
 
-  // 共通送信関数 — プレーン文字列で送信するように変更
+  // 共通送信関数（ログ・ガード付き）
   const sendData = (buttonName: string) => {
-    // ローカル保存はプレーン文字列で
-    saveJsonToFile(buttonName);
-    // 実際の送信（受け取り側がプレーン文字列を期待する）
-    sendJsonMessage(buttonName);
+    // 履歴保存（ローカル）
+    try {
+      saveJsonToFile(buttonName);
+    } catch (e) {
+      console.warn('saveJsonToFile failed', e);
+    }
+
+    // 送信関数の存在チェック
+    if (typeof sendJsonMessage !== 'function') {
+      console.error('sendJsonMessage is not a function. Did the parent pass it?', { sendJsonMessage });
+      return false;
+    }
+
+    // ログを出して送信を試みる
+    try {
+      console.log('sendData: sending', buttonName);
+      sendJsonMessage(buttonName);
+      return true;
+    } catch (e) {
+      console.error('sendJsonMessage threw:', e);
+      return false;
+    }
   };
 
   // handleButtonClick: 第3引数で section を明示できるように変更
@@ -217,10 +235,15 @@ export default function Accordions_Multicopter({ sendJsonMessage, serverParams }
     const counterId = parts.length > 1 ? parts.slice(0, -1).join('_') : parts[0];
     const currentNum2 = getCurrentNum2();
 
+    // デバッグログ（呼ばれた id / section を表示）
+    console.log('handleButtonClick called', { id, section, counterId, action });
+
     // Timer処理：action が start/stop のとき、counterId に timer を含むなら mapButtonName を使う
     if ((action === 'start' || action === 'stop') && counterId.toLowerCase().includes('timer')) {
       const name = mapButtonName(section, counterId, action) || `${section}_${counterId}_${action}`;
-      return sendData(name);
+      const ok = sendData(name);
+      if (!ok) console.warn('sendData failed for', name);
+      return;
     }
  
      // 特殊ケース（チェック系）は名前だけ送る
@@ -281,6 +304,8 @@ export default function Accordions_Multicopter({ sendJsonMessage, serverParams }
 
     if (!actionId) return;
 
+    console.log('stopwatchOnClickWrapper', { timerId, actionId, args });
+
     // timerId からセクションを推定（failsafe 等を正しくマッピングするため）
     const inferSectionFromTimerId = (tid: string) => {
       const t = tid.toLowerCase();
@@ -296,7 +321,8 @@ export default function Accordions_Multicopter({ sendJsonMessage, serverParams }
     };
 
     const inferredSection = inferSectionFromTimerId(timerId);
-
+    // 呼び出し前ログ
+    console.log('stopwatchOnClickWrapper -> handleButtonClick', { timerId, actionId, inferredSection });
     handleButtonClick(`${timerId}_${actionId}`, event, inferredSection);
   };
 
@@ -446,7 +472,7 @@ export default function Accordions_Multicopter({ sendJsonMessage, serverParams }
             id="failsafe_timer"
             start={serverParams?.failsafecontrol?.epoch?.start}
             end={serverParams?.failsafecontrol?.epoch?.end}
-            onClick={(actionId, event) => handleButtonClick(`failsafe_timer_${actionId}`, event, 'failsafecontrol')}
+            onClick={stopwatchOnClickWrapper('failsafe_timer')}
           />
           <FormGroup>
             {createCheckbox("failsafe_isHandsOff", "ハンズオフ飛行", "failsafecontrol")}
@@ -459,8 +485,7 @@ export default function Accordions_Multicopter({ sendJsonMessage, serverParams }
           <Stopwatch 
             id="unique_timer"
             start={serverParams?.uniqueMisson?.epoch?.start}
-            end={serverParams?.uniqueMisson?.epoch?.end}
-            onClick={(actionId, event) => handleButtonClick(`unique_timer_${actionId}`, event, 'uniqueMisson')}
+            end={serverParams?.uniqueMisson?.epoch?.end}            onClick={stopwatchOnClickWrapper('unique_timer')}
           />
           <FormGroup>
             {createCheckbox("unique_isSuccess", "成功", "uniqueMisson")}
@@ -505,7 +530,7 @@ export default function Accordions_Multicopter({ sendJsonMessage, serverParams }
             id="hovering_timer"
             start={serverParams?.hovering?.epoch?.start}
             end={serverParams?.hovering?.epoch?.end}
-            onClick={(actionId, event) => handleButtonClick(`hovering_timer_${actionId}`, event, 'hovering')}
+            onClick={stopwatchOnClickWrapper('hovering_timer')}
           />
           <FormGroup>
             {createCheckbox("isHandsOff", "ハンズオフ飛行", "hovering")}
@@ -526,7 +551,7 @@ export default function Accordions_Multicopter({ sendJsonMessage, serverParams }
       {createAccordion("landing", "panel8", "競技終了", (
         <FormGroup>
           {createCheckbox("isAreaTouchDown", "着陸成功", "landing")}
-          {createCheckbox("isInAreaStop", "パーティーポート内着陸成功", "landing")}
+          {createCheckbox("isInVertiport", "パーティーポート内着陸成功", "landing")}
           {createCheckbox("landing_button", "帰還", "landing")}
         </FormGroup>
       ))}

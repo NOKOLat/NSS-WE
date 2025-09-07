@@ -68,7 +68,8 @@ interface Props {
   serverParams: any;
 }
 
-export default function Accordions_Plane({ sendJsonMessage, sendMessage, serverParams }: Props & { sendMessage?: (msg: any) => void }) {
+export default function Accordions_Plane(props: Props) {
+  const { sendJsonMessage, serverParams } = props;
   const [expanded, setExpanded] = React.useState<string | false>('panel1');
   const handleChange = (panel: string) => (event: React.SyntheticEvent, newExpanded: boolean) => {
     setExpanded(newExpanded ? panel : false);
